@@ -19,7 +19,22 @@
 // Tipi
 // ---------------------------------------------------------------------------
 
-export type CablingPattern = "HS" | "HZ" | "VS" | "VZ";
+/**
+ * Pattern di cablaggio.
+ *  - HS/VS = serpentine (alterna direzione fra una riga e l'altra)
+ *  - HZ/VZ = zigzag/raster (sempre stessa direzione + ritorno carrello)
+ *  - HL/HR = linear orizzontale L→R / R→L (no corner, direzione esplicita)
+ *  - VT/VB = linear verticale T→B / B→T (no corner)
+ */
+export type CablingPattern =
+  | "HS"
+  | "HZ"
+  | "VS"
+  | "VZ"
+  | "HL"
+  | "HR"
+  | "VT"
+  | "VB";
 export type StartCorner = "TL" | "TR" | "BL" | "BR";
 
 export const CABLING_PATTERN_LABELS: Record<CablingPattern, string> = {
@@ -27,7 +42,38 @@ export const CABLING_PATTERN_LABELS: Record<CablingPattern, string> = {
   HZ: "Horizontal · Z",
   VS: "Vertical · S",
   VZ: "Vertical · Z",
+  HL: "Linear · L→R",
+  HR: "Linear · R→L",
+  VT: "Linear · T→B",
+  VB: "Linear · B→T",
 };
+
+/** Pattern "linear" — non hanno corner perché la direzione è esplicita.
+ *  Per l'algoritmo vengono normalizzati a HZ/VZ con corner fisso. */
+export const LINEAR_PATTERNS: CablingPattern[] = ["HL", "HR", "VT", "VB"];
+
+export function isLinearPattern(p: CablingPattern): boolean {
+  return LINEAR_PATTERNS.includes(p);
+}
+
+/** Mappa pattern lineari a (pattern algoritmico, corner forzato). */
+function normalizeCabling(
+  pattern: CablingPattern,
+  corner: StartCorner
+): { pattern: CablingPattern; corner: StartCorner } {
+  switch (pattern) {
+    case "HL":
+      return { pattern: "HZ", corner: "TL" };
+    case "HR":
+      return { pattern: "HZ", corner: "TR" };
+    case "VT":
+      return { pattern: "VZ", corner: "TL" };
+    case "VB":
+      return { pattern: "VZ", corner: "BL" };
+    default:
+      return { pattern, corner };
+  }
+}
 
 export const START_CORNER_LABELS: Record<StartCorner, string> = {
   TL: "Top-Left",
@@ -46,6 +92,14 @@ export interface CablingConfig {
   /** Override custom — usati solo se senderKey === "custom". */
   customMaxPixelsPerPort: number;
   customPortsPerCard: number;
+  /** Indici globali (1-based) dove iniziare un nuovo segmento (porta).
+   *  Vuoto = split automatico ogni cabinetsPerPort. */
+  customStarts: number[];
+  /** Override del numero di cabinet caricati per porta (load balancing).
+   *  0 = usa il massimo teorico permesso dal sender.
+   *  > 0 = forza un valore (clampato al max teorico). Usato per distribuire
+   *  il carico su più porte quando ce ne sono di libere. */
+  customCabinetsPerPort: number;
 }
 
 export const DEFAULT_CABLING: CablingConfig = {
@@ -55,6 +109,8 @@ export const DEFAULT_CABLING: CablingConfig = {
   senderKey: "MCTRL4K",
   customMaxPixelsPerPort: 650_000,
   customPortsPerCard: 4,
+  customStarts: [],
+  customCabinetsPerPort: 0,
 };
 
 // ---------------------------------------------------------------------------
@@ -122,13 +178,16 @@ export function findSender(key: string): SenderCard | null {
 export function getCablingOrder(
   cabinetsWide: number,
   cabinetsHigh: number,
-  pattern: CablingPattern,
-  corner: StartCorner
+  patternIn: CablingPattern,
+  cornerIn: StartCorner
 ): number[][] {
   const order: number[][] = Array.from({ length: cabinetsHigh }, () =>
     new Array(cabinetsWide).fill(0)
   );
   if (cabinetsWide <= 0 || cabinetsHigh <= 0) return order;
+
+  // Normalizza pattern linear a HZ/VZ con corner fisso
+  const { pattern, corner } = normalizeCabling(patternIn, cornerIn);
 
   const isHorizontal = pattern === "HS" || pattern === "HZ";
   const isSerpentine = pattern === "HS" || pattern === "VS";
@@ -188,8 +247,12 @@ export interface PortBudget {
   sender: SenderCard;
   /** Pixel di un singolo cabinet. */
   pixelsPerCabinet: number;
-  /** Cabinet per porta (limite hardware del sender). */
+  /** Cabinet per porta EFFETTIVAMENTE usato (rispetta eventuale override). */
   cabinetsPerPort: number;
+  /** Cabinet per porta massimo TEORICO permesso dal sender. */
+  maxCabinetsPerPort: number;
+  /** Se true, l'utente ha forzato un valore < max teorico (load balance). */
+  isOverridden: boolean;
   /** Pixel totali del progetto. */
   totalPixels: number;
   /** Numero di porte necessarie (totale cabinets / cabPerPort, ceiling). */
@@ -228,6 +291,8 @@ export function computePortBudget(
       sender,
       pixelsPerCabinet,
       cabinetsPerPort: 0,
+      maxCabinetsPerPort: 0,
+      isOverridden: false,
       totalPixels: 0,
       portsNeeded: 0,
       sendersNeeded: 0,
@@ -237,9 +302,19 @@ export function computePortBudget(
   }
 
   const oversized = pixelsPerCabinet > sender.maxPixelsPerPort;
-  const cabinetsPerPort = oversized
+  const maxCabinetsPerPort = oversized
     ? 0
     : Math.floor(sender.maxPixelsPerPort / pixelsPerCabinet);
+
+  // Override utente: clampato fra 1 e maxCabinetsPerPort
+  const customCpp = config.customCabinetsPerPort;
+  const useOverride =
+    !oversized &&
+    customCpp > 0 &&
+    customCpp <= maxCabinetsPerPort &&
+    customCpp < maxCabinetsPerPort;
+  const cabinetsPerPort = useOverride ? customCpp : maxCabinetsPerPort;
+
   const portsNeeded = oversized
     ? cabinetsTotal // 1 porta per cabinet (impossibile da rispettare)
     : Math.ceil(cabinetsTotal / cabinetsPerPort);
@@ -252,6 +327,8 @@ export function computePortBudget(
     sender,
     pixelsPerCabinet,
     cabinetsPerPort,
+    maxCabinetsPerPort,
+    isOverridden: useOverride,
     totalPixels: cabinetsTotal * pixelsPerCabinet,
     portsNeeded,
     sendersNeeded,

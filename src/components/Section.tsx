@@ -5,14 +5,27 @@ interface Props {
   children: ReactNode;
   description?: string;
   action?: ReactNode;
+  /** Quando "brand", colora il titolo in mint Resolume. */
+  titleAccent?: "brand";
 }
 
-export function Section({ title, description, children, action }: Props) {
+export function Section({
+  title,
+  description,
+  children,
+  action,
+  titleAccent,
+}: Props) {
   return (
     <section className="rounded-2xl border border-border bg-panel/70 p-4 shadow-sm">
       <header className="mb-4 flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-base font-semibold uppercase tracking-wider text-slate-100">
+          <h2
+            className={[
+              "text-base font-semibold uppercase tracking-wider",
+              titleAccent === "brand" ? "text-brand" : "text-slate-100",
+            ].join(" ")}
+          >
             {title}
           </h2>
           {description ? (

@@ -7,6 +7,8 @@ interface Props {
   min?: number;
   placeholder?: string;
   readOnly?: boolean;
+  /** Quando "brand", colora il valore numerico in mint Resolume. */
+  valueAccent?: "brand";
 }
 
 export function NumberField({
@@ -18,6 +20,7 @@ export function NumberField({
   min = 0,
   placeholder,
   readOnly = false,
+  valueAccent,
 }: Props) {
   const safeStep = step > 0 ? step : 1;
 
@@ -33,11 +36,13 @@ export function NumberField({
     onChange(rounded < min ? min : rounded);
   };
 
+  const valueColor =
+    valueAccent === "brand" ? "text-brand" : "text-slate-100";
   const inputClass = [
     "h-14 w-full rounded-xl border font-mono text-lg tabular-nums outline-none transition",
     readOnly
       ? "border-border bg-panel-2/40 text-slate-400 cursor-not-allowed"
-      : "border-border bg-panel-2 text-slate-100 focus:border-brand focus:ring-2 focus:ring-brand/30",
+      : `border-border bg-panel-2 ${valueColor} focus:border-brand focus:ring-2 focus:ring-brand/30`,
     "px-4",
     suffix ? (readOnly ? "pr-12" : "pr-20") : readOnly ? "pr-4" : "pr-14",
   ].join(" ");

@@ -1,4 +1,9 @@
-import { getCablingOrder, type CablingPattern, type StartCorner } from "../lib/cabling";
+import {
+  getCablingOrder,
+  isLinearPattern,
+  type CablingPattern,
+  type StartCorner,
+} from "../lib/cabling";
 
 interface Props {
   pattern: CablingPattern;
@@ -9,8 +14,14 @@ interface Props {
 }
 
 /**
- * Icona SVG che illustra un pattern di cablaggio su una griglia mini cells×cells.
- * Disegna una polyline che collega i centri dei cabinet nell'ordine corretto.
+ * Icona SVG che illustra un pattern di cablaggio su griglia mini cells×cells.
+ *
+ * Pattern HS/HZ/VS/VZ: polyline CONTINUA che attraversa tutti i cabinet —
+ *   l'eventuale diagonale di "ritorno carrello" mostra direzione del pattern
+ *   (utile per distinguere TL/TR/BL/BR fra loro).
+ *
+ * Pattern HL/HR/VT/VB (linear): polyline SPEZZATA ai cambi di riga/colonna —
+ *   visualizza chiaramente "frecce parallele tutte nella stessa direzione".
  */
 export function PatternIcon({
   pattern,
@@ -19,9 +30,8 @@ export function PatternIcon({
   cells = 3,
 }: Props) {
   const order = getCablingOrder(cells, cells, pattern, corner);
-  // Costruisco l'array di {row, col} ordinato 1..N
   const N = cells * cells;
-  const points: Array<{ x: number; y: number }> = [];
+  const points: Array<{ x: number; y: number; row: number; col: number }> = [];
   for (let n = 1; n <= N; n++) {
     outer: for (let r = 0; r < cells; r++) {
       for (let c = 0; c < cells; c++) {
@@ -29,14 +39,31 @@ export function PatternIcon({
           points.push({
             x: ((c + 0.5) / cells) * size,
             y: ((r + 0.5) / cells) * size,
+            row: r,
+            col: c,
           });
           break outer;
         }
       }
     }
   }
+
+  // Per pattern linear, spezza la polyline ad ogni cambio di riga/colonna
+  const linear = isLinearPattern(pattern);
+  const isJump = (
+    prev: typeof points[number],
+    curr: typeof points[number]
+  ) => {
+    if (!linear) return false;
+    if (pattern === "HL" || pattern === "HR") return prev.row !== curr.row;
+    return prev.col !== curr.col;
+  };
+
   const path = points
-    .map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)} ${p.y.toFixed(1)}`)
+    .map((p, i) => {
+      const cmd = i === 0 ? "M" : isJump(points[i - 1], p) ? "M" : "L";
+      return `${cmd}${p.x.toFixed(1)} ${p.y.toFixed(1)}`;
+    })
     .join(" ");
 
   // Griglia di sfondo
@@ -51,23 +78,42 @@ export function PatternIcon({
     );
   }
 
+  // Start dots: solo primo per non-linear, uno per segmento linear
+  const startDots: Array<{ x: number; y: number }> = [];
+  if (points[0]) startDots.push(points[0]);
+  if (linear) {
+    for (let i = 1; i < points.length; i++) {
+      if (isJump(points[i - 1], points[i])) startDots.push(points[i]);
+    }
+  }
+
+  // End arrows: ultimo per non-linear, uno per segmento linear
+  const endPairs: Array<{ from: { x: number; y: number }; to: { x: number; y: number } }> = [];
+  if (linear) {
+    for (let i = 0; i < points.length - 1; i++) {
+      if (isJump(points[i], points[i + 1]) && i >= 1) {
+        endPairs.push({ from: points[i - 1], to: points[i] });
+      }
+    }
+  }
+  if (points.length >= 2) {
+    endPairs.push({
+      from: points[points.length - 2],
+      to: points[points.length - 1],
+    });
+  }
+
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden>
       <rect width={size} height={size} rx={size * 0.12} fill="none" stroke="currentColor" strokeWidth="0.5" opacity="0.35" />
       {gridLines}
       <path d={path} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      {/* Punto di partenza */}
-      {points[0] ? (
-        <circle cx={points[0].x} cy={points[0].y} r={size * 0.07} fill="currentColor" />
-      ) : null}
-      {/* Freccia finale */}
-      {points.length >= 2 ? (
-        <ArrowHead
-          from={points[points.length - 2]}
-          to={points[points.length - 1]}
-          size={size * 0.18}
-        />
-      ) : null}
+      {startDots.map((p, i) => (
+        <circle key={`s${i}`} cx={p.x} cy={p.y} r={size * 0.07} fill="currentColor" />
+      ))}
+      {endPairs.map((pair, i) => (
+        <ArrowHead key={`a${i}`} from={pair.from} to={pair.to} size={size * 0.18} />
+      ))}
     </svg>
   );
 }
@@ -86,7 +132,6 @@ function ArrowHead({
   const len = Math.hypot(dx, dy) || 1;
   const ux = dx / len;
   const uy = dy / len;
-  // Vettore perpendicolare
   const px = -uy;
   const py = ux;
   const tipX = to.x;

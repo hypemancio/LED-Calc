@@ -165,3 +165,115 @@ export function findSavedByProjectId(projectId: string): SavedProject | null {
 export function clearHistory(): void {
   writeHistory([]);
 }
+
+// ---------------------------------------------------------------------------
+// Backup completo dello storico (export/import JSON)
+// ---------------------------------------------------------------------------
+
+const BACKUP_TYPE = "ledcalc-history-backup" as const;
+const BACKUP_VERSION = "1" as const;
+
+interface HistoryBackupFile {
+  type: typeof BACKUP_TYPE;
+  version: string;
+  exportedAt: number;
+  snapshots: SavedProject[];
+}
+
+/** Esporta l'intero storico come file JSON scaricabile. */
+export function exportHistoryBackup(): void {
+  if (!isBrowser()) return;
+  const data: HistoryBackupFile = {
+    type: BACKUP_TYPE,
+    version: BACKUP_VERSION,
+    exportedAt: Date.now(),
+    snapshots: loadHistory(),
+  };
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: "application/json;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  const date = new Date().toISOString().slice(0, 10);
+  a.download = `ledcalc-backup-${date}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/**
+ * Legge un file backup, valida la struttura, ritorna gli snapshot.
+ * Non scrive nulla in localStorage — sta al chiamante decidere strategia
+ * (replace vs merge) tramite `replaceHistory` o `mergeHistory`.
+ */
+export async function importHistoryBackup(file: File): Promise<SavedProject[]> {
+  const text = await file.text();
+  let data: unknown;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error("Il file non contiene JSON valido.");
+  }
+  if (!isBackupFile(data)) {
+    throw new Error(
+      "Il file non sembra un backup LED Calc (manca il marker 'ledcalc-history-backup')."
+    );
+  }
+  // Sanitize each snapshot
+  const valid: SavedProject[] = [];
+  for (const s of data.snapshots) {
+    if (
+      s &&
+      typeof s.id === "string" &&
+      typeof s.savedAt === "number" &&
+      s.project &&
+      Array.isArray(s.project.walls) &&
+      s.project.walls.length > 0
+    ) {
+      valid.push(s);
+    }
+  }
+  return valid;
+}
+
+function isBackupFile(data: unknown): data is HistoryBackupFile {
+  if (typeof data !== "object" || data === null) return false;
+  const d = data as Record<string, unknown>;
+  return (
+    d.type === BACKUP_TYPE &&
+    typeof d.version === "string" &&
+    Array.isArray(d.snapshots)
+  );
+}
+
+/** Sostituisce tutto lo storico corrente con quello fornito. */
+export function replaceHistory(items: SavedProject[]): void {
+  if (!isBrowser()) return;
+  const sorted = [...items].sort((a, b) => b.savedAt - a.savedAt);
+  writeHistory(sorted);
+}
+
+/**
+ * Unisce gli snapshot importati con quelli esistenti.
+ *  - Match per project.id → tiene la versione con `savedAt` più recente
+ *  - Snapshot orfani (no match) vengono aggiunti
+ */
+export function mergeHistory(incoming: SavedProject[]): void {
+  if (!isBrowser()) return;
+  const existing = loadHistory();
+  const byProjectId = new Map<string, SavedProject>();
+  for (const s of existing) {
+    byProjectId.set(s.project.id, s);
+  }
+  for (const inc of incoming) {
+    const cur = byProjectId.get(inc.project.id);
+    if (!cur || inc.savedAt > cur.savedAt) {
+      byProjectId.set(inc.project.id, inc);
+    }
+  }
+  const merged = Array.from(byProjectId.values()).sort(
+    (a, b) => b.savedAt - a.savedAt
+  );
+  writeHistory(merged);
+}

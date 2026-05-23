@@ -28,6 +28,7 @@ import { LcdReadout } from "./LcdReadout";
 import { Collapse } from "./Collapse";
 import { CablingSection } from "./CablingSection";
 import { PreviewLegend } from "./PreviewLegend";
+import { TestCardSection } from "./TestCardSection";
 import type { CablingConfig } from "../lib/cabling";
 
 const intFormat = new Intl.NumberFormat("it-IT");
@@ -41,9 +42,10 @@ const pctFormat = new Intl.NumberFormat("it-IT", {
 interface Props {
   wall: WallConfig;
   onChange: (updates: Partial<WallConfig>) => void;
+  projectName?: string;
 }
 
-export function WallEditor({ wall, onChange }: Props) {
+export function WallEditor({ wall, onChange, projectName }: Props) {
   // Derivati
   const pitchMm = getPitchMm(wall);
   const sourceRatio = useMemo(() => getSourceRatio(wall), [wall]);
@@ -108,6 +110,7 @@ export function WallEditor({ wall, onChange }: Props) {
       <div className="space-y-4 lg:col-span-3 lg:space-y-4">
         <Section
           title="Source Content"
+          titleAccent="brand"
           description="Aspect ratio della sorgente video/immagine."
         >
           <div className="flex flex-wrap gap-2">
@@ -169,6 +172,7 @@ export function WallEditor({ wall, onChange }: Props) {
               label="Ratio"
               value={sourceRatioLabel}
               sub={sourceRatio > 0 ? `${sourceRatio.toFixed(3)}:1` : "—"}
+              accent="brand"
             />
             <Stat
               label="Source vs Wall"
@@ -188,6 +192,7 @@ export function WallEditor({ wall, onChange }: Props) {
 
         <Section
           title="Cabinet"
+          titleAccent="brand"
           description="Sempre in mm. Seleziona un preset o usa Custom."
         >
           <label className="block">
@@ -247,6 +252,7 @@ export function WallEditor({ wall, onChange }: Props) {
 
         <Section
           title="Pixel pitch"
+          titleAccent="brand"
           description={
             wall.pitchSelection === "custom"
               ? "Custom — imposta pixel per cabinet, il pitch viene derivato dal cabinet."
@@ -327,6 +333,7 @@ export function WallEditor({ wall, onChange }: Props) {
 
         <Section
           title="Layout"
+          titleAccent="brand"
           description="Dimensioni del Ledwall — modifica in cabinet o in metri (sincronizzati)."
         >
           <div className="grid grid-cols-2 gap-3">
@@ -352,6 +359,7 @@ export function WallEditor({ wall, onChange }: Props) {
               step={0.5}
               value={wMeters}
               onChange={(v) => onChange({ wallWidthMm: v * 1000 })}
+              valueAccent="brand"
             />
             <NumberField
               label="Altezza"
@@ -359,6 +367,7 @@ export function WallEditor({ wall, onChange }: Props) {
               step={0.5}
               value={hMeters}
               onChange={(v) => onChange({ wallHeightMm: v * 1000 })}
+              valueAccent="brand"
             />
           </div>
         </Section>
@@ -367,14 +376,16 @@ export function WallEditor({ wall, onChange }: Props) {
           title="Stime per cabinet"
           description="Tara i default sulle schede tecniche."
         >
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
-            <NumberField
-              label="Peso"
-              suffix="kg"
-              value={wall.weightKgPerCabinet}
-              onChange={(v) => onChange({ weightKgPerCabinet: v })}
-              step={0.5}
-            />
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-2">
+            <div className="lg:col-span-2">
+              <NumberField
+                label="Peso"
+                suffix="kg"
+                value={wall.weightKgPerCabinet}
+                onChange={(v) => onChange({ weightKgPerCabinet: v })}
+                step={0.5}
+              />
+            </div>
             <NumberField
               label="W medi"
               suffix="W"
@@ -392,14 +403,6 @@ export function WallEditor({ wall, onChange }: Props) {
           </div>
         </Section>
 
-        <CablingSection
-          cabling={wall.cabling}
-          cabinetsTotal={result.cabinetsTotal}
-          pixelsPerCabinet={pixelsPerCabinet}
-          onChange={(updates: Partial<CablingConfig>) =>
-            onChange({ cabling: { ...wall.cabling, ...updates } })
-          }
-        />
       </div>
 
       {/* COLONNA CANVAS + CONSOLE (destra) */}
@@ -498,54 +501,93 @@ export function WallEditor({ wall, onChange }: Props) {
             cablingPattern={wall.cabling.pattern}
             cablingCorner={wall.cabling.corner}
             cablingSegmentSize={portBudget.cabinetsPerPort}
+            cablingCustomStarts={wall.cabling.customStarts}
+            onCabinetClick={
+              wall.cabling.showInPreview
+                ? (n) => {
+                    const has = wall.cabling.customStarts.includes(n);
+                    const next = has
+                      ? wall.cabling.customStarts.filter((x) => x !== n)
+                      : [...wall.cabling.customStarts, n];
+                    onChange({ cabling: { ...wall.cabling, customStarts: next } });
+                  }
+                : undefined
+            }
           />
           <PreviewLegend />
         </Section>
 
         <Section
           title="Fit / Fill analysis"
-          description="Pixel Ledwall usati (Fit, arancio) e pixel sorgente croppati (Fill, magenta)."
+          description={
+            wall.fitFillView === "actual"
+              ? "Valori esatti con decimali — calcolo matematico puro."
+              : "Valori approssimati al pixel intero (Math.round)."
+          }
+          action={
+            <SegmentedToggle<"actual" | "closest">
+              size="xs"
+              ariaLabel="Vista Fit/Fill"
+              value={wall.fitFillView}
+              onChange={(v) => onChange({ fitFillView: v })}
+              options={[
+                { value: "actual", label: "# Actual" },
+                { value: "closest", label: "□ Closest" },
+              ]}
+            />
+          }
         >
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Stat
-              label="Fit · area visibile"
-              value={`${intFormat.format(Math.round(fit.widthPx))} × ${intFormat.format(Math.round(fit.heightPx))}`}
-              sub={`${pctFormat.format(fit.utilization)} dei pixel Ledwall`}
-              accent="fit"
-              highlight
-            />
-            <Stat
-              label="Fit · letterbox"
-              value={
-                fit.letterboxYPx > fit.letterboxXPx
-                  ? `${intFormat.format(Math.round(fit.letterboxYPx))} px ↕`
-                  : fit.letterboxXPx > 0
-                  ? `${intFormat.format(Math.round(fit.letterboxXPx))} px ↔`
-                  : "0 px"
-              }
-              sub="per banda (sopra/sotto · sx/dx)"
-              accent="fit"
-            />
-            <Stat
-              label="Fill · sorgente"
-              value={`${intFormat.format(Math.round(fill.sourceWidthPx))} × ${intFormat.format(Math.round(fill.sourceHeightPx))}`}
-              sub={`${pctFormat.format(fill.visibleFraction)} visibile`}
-              accent="fill"
-              highlight
-            />
-            <Stat
-              label="Fill · crop"
-              value={
-                fill.croppedXPx > 0
-                  ? `${intFormat.format(Math.round(fill.croppedXPx / 2))} px ↔`
-                  : fill.croppedYPx > 0
-                  ? `${intFormat.format(Math.round(fill.croppedYPx / 2))} px ↕`
-                  : "0 px"
-              }
-              sub="per lato (sx/dx · sopra/sotto)"
-              accent="fill"
-            />
-          </div>
+          {(() => {
+            // Actual = decimali (2 cifre); Closest = intero arrotondato
+            const closest = wall.fitFillView === "closest";
+            const fmt = (v: number) =>
+              closest
+                ? intFormat.format(Math.round(v))
+                : dec2Format.format(v);
+
+            return (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <Stat
+                  label="Fit · area visibile"
+                  value={`${fmt(fit.widthPx)} × ${fmt(fit.heightPx)}`}
+                  sub={`${pctFormat.format(fit.utilization)} dei pixel Ledwall`}
+                  accent="fit"
+                  highlight
+                />
+                <Stat
+                  label="Fit · letterbox"
+                  value={
+                    fit.letterboxYPx > fit.letterboxXPx
+                      ? `${fmt(fit.letterboxYPx)} px ↕`
+                      : fit.letterboxXPx > 0
+                      ? `${fmt(fit.letterboxXPx)} px ↔`
+                      : "0 px"
+                  }
+                  sub="per banda (sopra/sotto · sx/dx)"
+                  accent="fit"
+                />
+                <Stat
+                  label="Fill · sorgente"
+                  value={`${fmt(fill.sourceWidthPx)} × ${fmt(fill.sourceHeightPx)}`}
+                  sub={`${pctFormat.format(fill.visibleFraction)} visibile`}
+                  accent="fill"
+                  highlight
+                />
+                <Stat
+                  label="Fill · crop"
+                  value={
+                    fill.croppedXPx > 0
+                      ? `${fmt(fill.croppedXPx / 2)} px ↔`
+                      : fill.croppedYPx > 0
+                      ? `${fmt(fill.croppedYPx / 2)} px ↕`
+                      : "0 px"
+                  }
+                  sub="per lato (sx/dx · sopra/sotto)"
+                  accent="fill"
+                />
+              </div>
+            );
+          })()}
         </Section>
 
         <Section
@@ -587,6 +629,17 @@ export function WallEditor({ wall, onChange }: Props) {
             />
           </div>
         </Section>
+
+        <CablingSection
+          cabling={wall.cabling}
+          cabinetsTotal={result.cabinetsTotal}
+          pixelsPerCabinet={pixelsPerCabinet}
+          onChange={(updates: Partial<CablingConfig>) =>
+            onChange({ cabling: { ...wall.cabling, ...updates } })
+          }
+        />
+
+        <TestCardSection wall={wall} projectName={projectName} />
       </div>
     </div>
   );

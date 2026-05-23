@@ -1,7 +1,11 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import {
   deleteFromHistory,
+  exportHistoryBackup,
+  importHistoryBackup,
   loadHistory,
+  mergeHistory,
+  replaceHistory,
   type SavedProject,
 } from "../lib/historyStore";
 import { computeProjectTotals } from "../lib/wall";
@@ -25,10 +29,13 @@ const intFormat = new Intl.NumberFormat("it-IT");
 const dec2Format = new Intl.NumberFormat("it-IT", { maximumFractionDigits: 2 });
 
 export function HistoryDialog({ open, onClose, onLoad, refreshKey = 0 }: Props) {
-  // Reload list when dialog opens or refreshKey changes
+  const [localBump, setLocalBump] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Reload list when dialog opens, refreshKey changes, or local bump increments
   const items = useMemo<SavedProject[]>(
     () => (open ? loadHistory() : []),
-    [open, refreshKey]
+    [open, refreshKey, localBump]
   );
 
   // Esc per chiudere
@@ -40,6 +47,52 @@ export function HistoryDialog({ open, onClose, onLoad, refreshKey = 0 }: Props) 
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [open, onClose]);
+
+  const handleExportBackup = () => {
+    if (items.length === 0) {
+      alert("Lo storico è vuoto — nessun progetto da esportare.");
+      return;
+    }
+    exportHistoryBackup();
+  };
+
+  const handleImportClick = () => fileInputRef.current?.click();
+
+  const handleImportFile = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    try {
+      const incoming = await importHistoryBackup(file);
+      if (incoming.length === 0) {
+        alert("Il backup non contiene snapshot validi.");
+        return;
+      }
+      let strategy: "replace" | "merge" | null;
+      if (items.length === 0) {
+        strategy = "replace"; // niente da preservare
+      } else {
+        const ans = prompt(
+          `Il backup contiene ${incoming.length} snapshot.\n\nLo storico locale ne ha ${items.length}.\n\nDigita "merge" per unire (i più recenti vincono), "replace" per sovrascrivere tutto, oppure annulla.`,
+          "merge"
+        );
+        if (!ans) return;
+        const a = ans.trim().toLowerCase();
+        if (a === "merge") strategy = "merge";
+        else if (a === "replace") strategy = "replace";
+        else {
+          alert("Strategia non riconosciuta — annullato.");
+          return;
+        }
+      }
+      if (strategy === "replace") replaceHistory(incoming);
+      else mergeHistory(incoming);
+      setLocalBump((b) => b + 1);
+      window.dispatchEvent(new CustomEvent("ledcalc-history-changed"));
+    } catch (err) {
+      alert((err as Error).message);
+    }
+  };
 
   if (!open) return null;
 
@@ -55,8 +108,8 @@ export function HistoryDialog({ open, onClose, onLoad, refreshKey = 0 }: Props) 
         className="w-full max-w-2xl overflow-hidden rounded-2xl border border-border bg-bg shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <header className="flex items-center justify-between border-b border-border bg-panel-2 px-5 py-3">
-          <div>
+        <header className="flex items-center justify-between gap-3 border-b border-border bg-panel-2 px-5 py-3">
+          <div className="min-w-0 flex-1">
             <h2 className="text-base font-semibold uppercase tracking-[0.12em] text-slate-100">
               Storico progetti
             </h2>
@@ -64,14 +117,40 @@ export function HistoryDialog({ open, onClose, onLoad, refreshKey = 0 }: Props) 
               {items.length} salvataggi in locale (localStorage)
             </p>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Chiudi"
-            className="grid h-8 w-8 place-items-center rounded-lg border border-border bg-panel text-slate-400 transition hover:border-brand hover:text-brand"
-          >
-            ×
-          </button>
+          <div className="flex flex-none items-center gap-1.5">
+            <button
+              type="button"
+              onClick={handleExportBackup}
+              className="rounded-md border border-fit/40 bg-fit/10 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-fit-bright transition hover:border-fit hover:bg-fit/20"
+              title="Esporta tutto lo storico come file JSON"
+            >
+              Export backup
+            </button>
+            <button
+              type="button"
+              onClick={handleImportClick}
+              className="rounded-md border border-fill/40 bg-fill/10 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-fill-bright transition hover:border-fill hover:bg-fill/20"
+              title="Importa un backup completo dello storico"
+            >
+              Import backup
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json,application/json"
+              onChange={handleImportFile}
+              className="hidden"
+              aria-hidden
+            />
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Chiudi"
+              className="grid h-8 w-8 place-items-center rounded-lg border border-border bg-panel text-slate-400 transition hover:border-brand hover:text-brand"
+            >
+              ×
+            </button>
+          </div>
         </header>
 
         {items.length === 0 ? (

@@ -23,8 +23,13 @@ interface Props {
   cablingPattern?: CablingPattern;
   cablingCorner?: StartCorner;
   /** Numero di cabinet per porta del sender — se >0 la polyline globale
-   *  viene spezzata in N segmenti, ognuno con START + END marker. */
+   *  viene spezzata in N segmenti automatici di questa lunghezza. */
   cablingSegmentSize?: number;
+  /** Override manuale: indici globali (1-based) dove iniziare nuovi segmenti.
+   *  Se non vuoto, ignora `cablingSegmentSize` e splitta nei punti scelti. */
+  cablingCustomStarts?: number[];
+  /** Callback quando l'utente clicca un cabinet (solo se cablingShow=true). */
+  onCabinetClick?: (cabinetIndex: number) => void;
 }
 
 // Palette colori dell'anteprima (sincronizzata con tailwind.config.js)
@@ -145,6 +150,8 @@ export function CabinetPreview({
   cablingPattern = "HS",
   cablingCorner = "TL",
   cablingSegmentSize,
+  cablingCustomStarts,
+  onCabinetClick,
 }: Props) {
   // Compute target values (instant, then animati separatamente)
   const safe =
@@ -397,20 +404,46 @@ export function CabinetPreview({
                 }
               }
 
-              // Split in segmenti per porta del sender
-              const segSize =
-                cablingSegmentSize && cablingSegmentSize > 0
-                  ? cablingSegmentSize
-                  : points.length;
+              // Split in segmenti: prima customStarts (override manuale),
+              // altrimenti auto a cabinetsPerPort
               const segments: Array<typeof points> = [];
-              for (let i = 0; i < points.length; i += segSize) {
-                segments.push(points.slice(i, i + segSize));
+              const customs =
+                cablingCustomStarts && cablingCustomStarts.length > 0
+                  ? Array.from(new Set(cablingCustomStarts))
+                      .filter((n) => n >= 1 && n <= points.length)
+                      .sort((a, b) => a - b)
+                  : null;
+              if (customs && customs.length > 0) {
+                // Aggiungi 1 (inizio) se non già presente
+                const breakpoints = [
+                  ...(customs[0] === 1 ? customs : [1, ...customs]),
+                  points.length + 1, // sentinella
+                ];
+                for (let i = 0; i < breakpoints.length - 1; i++) {
+                  const from = breakpoints[i];
+                  const to = breakpoints[i + 1] - 1;
+                  segments.push(points.slice(from - 1, to));
+                }
+              } else {
+                const segSize =
+                  cablingSegmentSize && cablingSegmentSize > 0
+                    ? cablingSegmentSize
+                    : points.length;
+                for (let i = 0; i < points.length; i += segSize) {
+                  segments.push(points.slice(i, i + segSize));
+                }
               }
 
               // Stile cablaggio — sottile, semi-trasparente, tratteggio leggero
               const cablingStroke = stroke * 0.8;
               const cabFontSize = Math.min(cw, ch) * 0.22;
               const dash = `${cablingStroke * 5} ${cablingStroke * 3}`;
+              // Cerchio start: appena più grande del numero per contenerlo
+              const startCircleR = Math.min(cw, ch) * 0.22;
+              // Indici dei cabinet che sono "start" di un segmento
+              const startIndices = new Set<number>(
+                segments.map((s) => s[0]?.n).filter((n): n is number => !!n)
+              );
 
               return (
                 <>
@@ -438,12 +471,16 @@ export function CabinetPreview({
                           strokeDasharray={dash}
                           style={{ transition: "d 0.3s ease-out" }}
                         />
-                        {/* Pallino START */}
+                        {/* Cerchio START — abbastanza grande da contenere il numero */}
                         <circle
                           cx={first.x}
                           cy={first.y}
-                          r={cablingStroke * 1.8}
+                          r={startCircleR}
                           fill={`rgb(${C.cabling} / 0.95)`}
+                          style={{
+                            transition:
+                              "cx 0.35s ease-out, cy 0.35s ease-out, r 0.35s ease-out",
+                          }}
                         />
                         {/* Freccia END (solo se segmento ha >=2 punti) */}
                         {seg.length >= 2
@@ -471,31 +508,57 @@ export function CabinetPreview({
                       </g>
                     );
                   })}
-                  {/* Numeri sequenziali in ogni cabinet (globali 1..N) */}
-                  {points.map((p) => (
-                    <text
-                      key={`cab-${p.n}`}
-                      x={p.x}
-                      y={p.y + cabFontSize * 0.35}
-                      textAnchor="middle"
-                      fill={`rgb(${C.cabling} / 0.85)`}
-                      fontFamily="'JetBrains Mono', ui-monospace, monospace"
-                      fontSize={cabFontSize}
-                      fontWeight={600}
-                    >
-                      {p.n}
-                    </text>
-                  ))}
+                  {/* Numeri sequenziali in ogni cabinet (globali 1..N) —
+                      sui cabinet START il colore si inverte (scuro su mint
+                      del cerchio sotto) per restare leggibile. */}
+                  {points.map((p) => {
+                    const isStart = startIndices.has(p.n);
+                    return (
+                      <text
+                        key={`cab-${p.n}`}
+                        x={p.x}
+                        y={p.y + cabFontSize * 0.35}
+                        textAnchor="middle"
+                        fill={isStart ? "#0a0b0c" : `rgb(${C.cabling} / 0.85)`}
+                        fontFamily="'JetBrains Mono', ui-monospace, monospace"
+                        fontSize={cabFontSize}
+                        fontWeight={isStart ? 700 : 600}
+                        pointerEvents="none"
+                        style={{ transition: "fill 0.25s ease-out" }}
+                      >
+                        {p.n}
+                      </text>
+                    );
+                  })}
+                  {/* Hit areas cliccabili per ogni cabinet — sopra tutto */}
+                  {onCabinetClick
+                    ? points.map((p) => (
+                        <rect
+                          key={`hit-${p.n}`}
+                          x={p.x - cw / 2}
+                          y={p.y - ch / 2}
+                          width={cw}
+                          height={ch}
+                          fill="transparent"
+                          style={{ cursor: "pointer" }}
+                          onClick={() => onCabinetClick(p.n)}
+                        >
+                          <title>
+                            Cabinet #{p.n} · click per aggiungere/togliere come start di segmento
+                          </title>
+                        </rect>
+                      ))
+                    : null}
                 </>
               );
             })()}
           </g>
         ) : null}
 
-        {/* Label risoluzione — larghezza sopra, altezza ruotata a sinistra */}
+        {/* Label risoluzione — larghezza SOTTO, altezza ruotata a DESTRA */}
         <text
           x={wallW / 2}
-          y={-labelOffset}
+          y={wallH + labelOffset + labelFontSize * 0.85}
           textAnchor="middle"
           fill={`rgb(${C.wall} / 0.95)`}
           fontFamily="'JetBrains Mono', ui-monospace, monospace"
@@ -509,14 +572,14 @@ export function CabinetPreview({
           {resolutionWidthLabel}
         </text>
         <text
-          x={-labelOffset}
+          x={wallW + labelOffset}
           y={wallH / 2}
           textAnchor="middle"
           fill={`rgb(${C.wall} / 0.95)`}
           fontFamily="'JetBrains Mono', ui-monospace, monospace"
           fontSize={labelFontSize}
           fontWeight={700}
-          transform={`rotate(-90, ${-labelOffset}, ${wallH / 2})`}
+          transform={`rotate(90, ${wallW + labelOffset}, ${wallH / 2})`}
           style={{
             ...textTransition,
             letterSpacing: `${labelFontSize * 0.04}px`,

@@ -51,16 +51,21 @@ const C = {
 
 export async function exportProjectPng(project: Project): Promise<void> {
   const { svg, width, height } = buildProjectSvg(project);
+  const pngBlob = await svgToPngBlob(svg, width, height, 2);
+  triggerDownload(pngBlob, buildFilename(project, "png"));
+}
 
-  // Embed SVG in image
+/** Renderizza un SVG arbitrario in un Blob PNG via canvas 2D. Scale = 2 → retina. */
+export async function svgToPngBlob(
+  svg: string,
+  width: number,
+  height: number,
+  scale = 2
+): Promise<Blob> {
   const svgBlob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
   const svgUrl = URL.createObjectURL(svgBlob);
-
   try {
     const img = await loadImage(svgUrl);
-
-    // Render to canvas a 2x per retina/print quality
-    const scale = 2;
     const canvas = document.createElement("canvas");
     canvas.width = width * scale;
     canvas.height = height * scale;
@@ -72,9 +77,7 @@ export async function exportProjectPng(project: Project): Promise<void> {
     ctx.fillStyle = C.bg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(img, 0, 0, width * scale, height * scale);
-
-    const pngBlob = await canvasToBlob(canvas);
-    triggerDownload(pngBlob, buildFilename(project));
+    return await canvasToBlob(canvas);
   } finally {
     URL.revokeObjectURL(svgUrl);
   }
@@ -84,7 +87,7 @@ export async function exportProjectPng(project: Project): Promise<void> {
 // SVG builder
 // ---------------------------------------------------------------------------
 
-function buildProjectSvg(project: Project): {
+export function buildProjectSvg(project: Project): {
   svg: string;
   width: number;
   height: number;
@@ -397,7 +400,7 @@ function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
   });
 }
 
-function triggerDownload(blob: Blob, filename: string): void {
+export function triggerDownload(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -409,7 +412,7 @@ function triggerDownload(blob: Blob, filename: string): void {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-function buildFilename(project: Project): string {
+export function buildFilename(project: Project, ext = "png"): string {
   const sanitized = (project.name || "led-calc-project")
     .toLowerCase()
     .replace(/[^a-z0-9-_]+/g, "-")
@@ -418,7 +421,7 @@ function buildFilename(project: Project): string {
   const date = new Date()
     .toISOString()
     .slice(0, 10);
-  return `${sanitized || "led-calc"}-${date}.png`;
+  return `${sanitized || "led-calc"}-${date}.${ext}`;
 }
 
 function escapeXml(s: string): string {

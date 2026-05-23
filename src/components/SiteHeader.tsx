@@ -33,7 +33,7 @@ export function SiteHeader() {
           LED Calc
         </div>
         <div className="hidden text-xs text-slate-500 sm:block">
-          · Tool calcolatore pareti LED
+          · Tool calcolatore pareti LED · hypemancio
         </div>
         <div className="ml-auto font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
           v0.1

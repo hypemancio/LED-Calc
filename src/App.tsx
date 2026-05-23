@@ -28,6 +28,7 @@ import {
   saveWorking,
 } from "./lib/historyStore";
 import { exportProjectPng } from "./lib/exportPng";
+import { exportProjectPdf } from "./lib/exportPdf";
 import { exportProjectJson, importProjectJson } from "./lib/projectIo";
 
 export default function App() {
@@ -180,10 +181,10 @@ export default function App() {
     setProject(createDefaultProject());
   };
 
-  const [exporting, setExporting] = useState(false);
+  const [exporting, setExporting] = useState<null | "png" | "pdf">(null);
   const exportPng = async () => {
     if (exporting) return;
-    setExporting(true);
+    setExporting("png");
     try {
       await exportProjectPng(project);
       setSavedToast("PNG esportato");
@@ -192,7 +193,21 @@ export default function App() {
       console.error("Export PNG failed:", err);
       alert("Errore durante l'export PNG. Controlla la console per dettagli.");
     } finally {
-      setExporting(false);
+      setExporting(null);
+    }
+  };
+  const exportPdf = async () => {
+    if (exporting) return;
+    setExporting("pdf");
+    try {
+      await exportProjectPdf(project);
+      setSavedToast("PDF esportato");
+      window.setTimeout(() => setSavedToast(null), 2500);
+    } catch (err) {
+      console.error("Export PDF failed:", err);
+      alert("Errore durante l'export PDF. Controlla la console per dettagli.");
+    } finally {
+      setExporting(null);
     }
   };
 
@@ -304,11 +319,20 @@ export default function App() {
               <button
                 type="button"
                 onClick={exportPng}
-                disabled={exporting}
+                disabled={exporting !== null}
                 className="rounded-lg border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-amber-200 transition hover:border-amber-400 hover:bg-amber-400/20 disabled:cursor-not-allowed disabled:opacity-50"
                 title="Esporta scheda progetto come immagine PNG"
               >
-                {exporting ? "Export…" : "Export PNG"}
+                {exporting === "png" ? "Export…" : "Export PNG"}
+              </button>
+              <button
+                type="button"
+                onClick={exportPdf}
+                disabled={exporting !== null}
+                className="rounded-lg border border-sky-400/40 bg-sky-400/10 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-sky-200 transition hover:border-sky-400 hover:bg-sky-400/20 disabled:cursor-not-allowed disabled:opacity-50"
+                title="Esporta scheda progetto come PDF"
+              >
+                {exporting === "pdf" ? "Export…" : "Export PDF"}
               </button>
               <button
                 type="button"
@@ -389,6 +413,7 @@ export default function App() {
                 key={activeWall.id}
                 wall={activeWall}
                 onChange={updateActiveWall}
+                projectName={project.name}
               />
             </div>
 

@@ -17,7 +17,7 @@ const BORDER_CLASS: Record<Accent, string> = {
 };
 
 const TEXT_CLASS: Record<Accent, string> = {
-  brand: "text-brand-bright",
+  brand: "text-brand",
   fit: "text-fit-bright",
   fill: "text-fill-bright",
 };

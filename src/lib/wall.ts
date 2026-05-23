@@ -57,6 +57,9 @@ export interface WallConfig {
 
   // Cablaggio (Novastar pattern + porte sender)
   cabling: CablingConfig;
+
+  /** Vista del pannello Fit/Fill: valori esatti o snap al pixel cabinet. */
+  fitFillView: "actual" | "closest";
 }
 
 /** Crea un id unico — usa crypto.randomUUID se disponibile, fallback random. */
@@ -93,6 +96,7 @@ export function createDefaultWall(name = "Ledwall 1"): WallConfig {
     powerAvgWPerCabinet: DEFAULT_POWER_AVG_W_PER_CABINET,
     powerPeakWPerCabinet: DEFAULT_POWER_PEAK_W_PER_CABINET,
     cabling: { ...DEFAULT_CABLING },
+    fitFillView: "actual",
   };
 }
 
@@ -129,12 +133,30 @@ export function createDefaultProject(): Project {
 /** Garantisce che un Project (anche legacy/importato) abbia un id. */
 export function ensureProjectId(p: Project): Project {
   const withId = p.id && typeof p.id === "string" ? p : { ...p, id: makeId() };
-  // Backfilla anche `cabling` sui wall legacy (creati prima di Phase 5)
-  const walls = withId.walls.map((w) =>
-    w.cabling
-      ? w
-      : { ...w, cabling: { ...DEFAULT_CABLING } }
-  );
+  // Backfilla i campi nuovi sui wall legacy (creati prima di feature successive)
+  const walls = withId.walls.map((w) => {
+    let wall = w;
+    if (!wall.cabling) {
+      wall = { ...wall, cabling: { ...DEFAULT_CABLING } };
+    } else {
+      // Backfill campi nuovi su cabling esistente
+      const cab = { ...wall.cabling };
+      let changed = false;
+      if (!Array.isArray(cab.customStarts)) {
+        cab.customStarts = [];
+        changed = true;
+      }
+      if (typeof cab.customCabinetsPerPort !== "number") {
+        cab.customCabinetsPerPort = 0;
+        changed = true;
+      }
+      if (changed) wall = { ...wall, cabling: cab };
+    }
+    if (wall.fitFillView !== "actual" && wall.fitFillView !== "closest") {
+      wall = { ...wall, fitFillView: "actual" };
+    }
+    return wall;
+  });
   return { ...withId, walls };
 }
 

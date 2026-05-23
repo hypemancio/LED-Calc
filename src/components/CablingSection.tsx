@@ -6,10 +6,12 @@ import { SegmentedToggle } from "./SegmentedToggle";
 import { PatternIcon } from "./PatternIcon";
 import {
   CABLING_PATTERN_LABELS,
+  LINEAR_PATTERNS,
   NOVASTAR_SENDERS,
   START_CORNER_LABELS,
   computePortBudget,
   findSender,
+  isLinearPattern,
   type CablingConfig,
   type CablingPattern,
   type StartCorner,
@@ -30,6 +32,14 @@ const pctFormat = new Intl.NumberFormat("it-IT", {
 
 const PATTERNS: CablingPattern[] = ["HS", "HZ", "VS", "VZ"];
 const CORNERS: StartCorner[] = ["TL", "TR", "BL", "BR"];
+
+/** Corner forzato per ciascun pattern linear (la direzione è esplicita). */
+const LINEAR_FIXED_CORNER: Record<string, StartCorner> = {
+  HL: "TL",
+  HR: "TR",
+  VT: "TL",
+  VB: "BL",
+};
 
 export function CablingSection({
   cabling,
@@ -62,13 +72,18 @@ export function CablingSection({
         />
       }
     >
-      {/* Pattern picker — 4 pattern × 4 corner = 16 icone */}
+      {/* Pattern picker */}
       <div className="space-y-2">
         <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-          Pattern · {CABLING_PATTERN_LABELS[cabling.pattern]} ·{" "}
-          {START_CORNER_LABELS[cabling.corner]}
+          Pattern ·{" "}
+          {CABLING_PATTERN_LABELS[cabling.pattern]}
+          {!isLinearPattern(cabling.pattern)
+            ? ` · ${START_CORNER_LABELS[cabling.corner]}`
+            : ""}
         </div>
-        <div className="grid grid-cols-4 gap-1.5">
+
+        {/* Serpentine/Raster (HS/HZ/VS/VZ × 4 corner = 16) */}
+        <div className="grid grid-cols-8 gap-1">
           {PATTERNS.flatMap((pattern) =>
             CORNERS.map((corner) => {
               const active =
@@ -81,17 +96,53 @@ export function CablingSection({
                   aria-label={`${CABLING_PATTERN_LABELS[pattern]} da ${START_CORNER_LABELS[corner]}`}
                   title={`${CABLING_PATTERN_LABELS[pattern]} · ${START_CORNER_LABELS[corner]}`}
                   className={[
-                    "grid place-items-center rounded-md border transition aspect-square",
+                    "grid h-9 place-items-center rounded-md border transition",
                     active
                       ? "border-brand bg-brand/15 text-brand-bright"
                       : "border-border bg-panel-2 text-slate-400 hover:border-slate-500 hover:text-slate-200",
                   ].join(" ")}
                 >
-                  <PatternIcon pattern={pattern} corner={corner} size={32} />
+                  <PatternIcon pattern={pattern} corner={corner} size={22} />
                 </button>
               );
             })
           )}
+        </div>
+
+        {/* Linear esplicitamente direzionali (HL/HR/VT/VB, no corner) */}
+        <div className="flex items-center gap-2">
+          <span className="text-[9px] font-semibold uppercase tracking-wider text-slate-500">
+            Linear
+          </span>
+          <div className="grid flex-1 grid-cols-4 gap-1">
+            {LINEAR_PATTERNS.map((pattern) => {
+              const fixedCorner = LINEAR_FIXED_CORNER[pattern];
+              const active = cabling.pattern === pattern;
+              return (
+                <button
+                  key={pattern}
+                  type="button"
+                  onClick={() =>
+                    onChange({ pattern, corner: fixedCorner })
+                  }
+                  aria-label={CABLING_PATTERN_LABELS[pattern]}
+                  title={CABLING_PATTERN_LABELS[pattern]}
+                  className={[
+                    "grid h-9 place-items-center rounded-md border transition",
+                    active
+                      ? "border-brand bg-brand/15 text-brand-bright"
+                      : "border-border bg-panel-2 text-slate-400 hover:border-slate-500 hover:text-slate-200",
+                  ].join(" ")}
+                >
+                  <PatternIcon
+                    pattern={pattern}
+                    corner={fixedCorner}
+                    size={22}
+                  />
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -136,6 +187,48 @@ export function CablingSection({
         ) : null}
       </div>
 
+      {/* Override carico per porta — load balance */}
+      {!budget.oversized && budget.maxCabinetsPerPort > 1 ? (
+        <div className="space-y-2 rounded-lg border border-border bg-panel-2/40 p-3">
+          <div className="flex items-baseline justify-between gap-3">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-300">
+                Cab / porta — load balance
+              </div>
+              <p className="mt-0.5 text-[11px] text-slate-500">
+                {budget.isOverridden
+                  ? `Override attivo · ${budget.cabinetsPerPort} di max ${budget.maxCabinetsPerPort}`
+                  : `Auto · usa il max teorico ${budget.maxCabinetsPerPort}`}
+              </p>
+            </div>
+            {budget.isOverridden ? (
+              <button
+                type="button"
+                onClick={() => onChange({ customCabinetsPerPort: 0 })}
+                className="rounded-md border border-border bg-panel px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 transition hover:border-brand hover:text-brand"
+              >
+                Auto
+              </button>
+            ) : null}
+          </div>
+          <NumberField
+            label={`Override (max ${budget.maxCabinetsPerPort})`}
+            suffix="cab"
+            step={1}
+            min={0}
+            value={cabling.customCabinetsPerPort}
+            onChange={(v) =>
+              onChange({
+                customCabinetsPerPort: Math.max(
+                  0,
+                  Math.min(budget.maxCabinetsPerPort, Math.round(v))
+                ),
+              })
+            }
+          />
+        </div>
+      ) : null}
+
       {/* Budget stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
         <Stat
@@ -148,9 +241,17 @@ export function CablingSection({
           sub={
             budget.oversized
               ? "cabinet oversized"
+              : budget.isOverridden
+              ? `${pctFormat.format(budget.portUtilization)} util · max ${budget.maxCabinetsPerPort}`
               : `${pctFormat.format(budget.portUtilization)} util.`
           }
-          accent={budget.oversized ? "fill" : undefined}
+          accent={
+            budget.oversized
+              ? "fill"
+              : budget.isOverridden
+              ? "fit"
+              : undefined
+          }
         />
         <Stat
           label="Porte necessarie"
@@ -180,6 +281,54 @@ export function CablingSection({
           receiver card o cambia sender.
         </div>
       ) : null}
+
+      {/* Custom origins per segmento — click su preview per definire */}
+      <div className="space-y-2 border-t border-border pt-3">
+        <div className="flex items-baseline justify-between gap-3">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-300">
+              Custom origins
+            </div>
+            <p className="mt-0.5 text-[11px] text-slate-500">
+              {cabling.customStarts.length === 0
+                ? "Click sui cabinet nel preview per definire l'inizio di una porta."
+                : `${cabling.customStarts.length} start manuali · split del cablaggio nei punti scelti.`}
+            </p>
+          </div>
+          {cabling.customStarts.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => onChange({ customStarts: [] })}
+              className="rounded-md border border-border bg-panel px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 transition hover:border-fill hover:text-fill-bright"
+            >
+              Reset
+            </button>
+          ) : null}
+        </div>
+        {cabling.customStarts.length > 0 ? (
+          <div className="flex flex-wrap gap-1.5">
+            {[...cabling.customStarts]
+              .sort((a, b) => a - b)
+              .map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() =>
+                    onChange({
+                      customStarts: cabling.customStarts.filter(
+                        (x) => x !== n
+                      ),
+                    })
+                  }
+                  title={`Rimuovi start su cabinet #${n}`}
+                  className="rounded-full border border-brand/40 bg-brand/10 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-brand-bright transition hover:border-fill hover:bg-fill/10 hover:text-fill-bright"
+                >
+                  #{n}
+                </button>
+              ))}
+          </div>
+        ) : null}
+      </div>
     </Section>
   );
 }
