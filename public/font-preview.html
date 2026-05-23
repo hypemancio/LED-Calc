@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LED Calc — Font Preview</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Sora:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Chakra+Petch:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+      }
+      html,
+      body {
+        background: #0f172a;
+        color: #f1f5f9;
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+      body {
+        min-height: 100vh;
+        padding: 32px 24px 64px;
+      }
+      .page {
+        max-width: 1280px;
+        margin: 0 auto;
+      }
+      header.top {
+        margin-bottom: 28px;
+      }
+      header.top h1 {
+        font-size: 28px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+      header.top p {
+        margin-top: 8px;
+        color: #94a3b8;
+        font-size: 14px;
+        max-width: 640px;
+      }
+      .legend {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 16px;
+        font-size: 12px;
+        color: #64748b;
+      }
+      .legend span {
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: #1e293b;
+        border: 1px solid #334155;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+        gap: 16px;
+      }
+      .card {
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid #1e293b;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.02) inset;
+      }
+      .card-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #1e293b;
+      }
+      .font-name {
+        font-family: "Inter", sans-serif;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #38bdf8;
+        font-weight: 600;
+      }
+      .font-tag {
+        font-family: "Inter", sans-serif;
+        font-size: 11px;
+        color: #64748b;
+      }
+      .demo-h1 {
+        font-size: 26px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: #f8fafc;
+      }
+      .demo-sub {
+        font-size: 13px;
+        color: #94a3b8;
+        margin-top: 4px;
+        margin-bottom: 18px;
+      }
+      .stat-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+      .stat {
+        border: 1px solid #1e293b;
+        background: rgba(15, 23, 42, 0.4);
+        border-radius: 12px;
+        padding: 10px 12px;
+      }
+      .stat.hl {
+        border-color: rgba(56, 189, 248, 0.4);
+        background: rgba(14, 165, 233, 0.1);
+      }
+      .stat-label {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #94a3b8;
+        font-weight: 600;
+      }
+      .stat-value {
+        font-size: 18px;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+        margin-top: 4px;
+        color: #f1f5f9;
+      }
+      .stat.hl .stat-value {
+        color: #bae6fd;
+      }
+      .stat-sub {
+        font-size: 11px;
+        color: #64748b;
+        font-variant-numeric: tabular-nums;
+        margin-top: 2px;
+      }
+      .chip-row {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+      .chip {
+        font-size: 12px;
+        font-weight: 500;
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid #334155;
+        background: #1e293b;
+        color: #cbd5e1;
+      }
+      .chip.active {
+        border-color: #38bdf8;
+        background: rgba(56, 189, 248, 0.15);
+        color: #bae6fd;
+      }
+      .num-strip {
+        font-size: 24px;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.01em;
+        margin-top: 10px;
+        color: #f8fafc;
+      }
+      .alphabet {
+        font-size: 13px;
+        color: #64748b;
+        margin-top: 12px;
+        line-height: 1.4;
+      }
+      /* font-specific containers */
+      .f-rubik          { font-family: "Rubik", sans-serif; }
+      .f-space          { font-family: "Space Grotesk", sans-serif; }
+      .f-geist          { font-family: "Geist", sans-serif; }
+      .f-jetbrains      { font-family: "JetBrains Mono", monospace; }
+      .f-sora           { font-family: "Sora", sans-serif; }
+      .f-plex           { font-family: "IBM Plex Sans", sans-serif; }
+      .f-plex-mono      { font-family: "IBM Plex Mono", monospace; }
+      .f-chakra         { font-family: "Chakra Petch", sans-serif; }
+      .f-dm             { font-family: "DM Sans", sans-serif; }
+      .f-outfit         { font-family: "Outfit", sans-serif; }
+      .f-inter          { font-family: "Inter", sans-serif; }
+      .f-orbitron       { font-family: "Orbitron", sans-serif; }
+
+      .pick {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 14px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(56, 189, 248, 0.12);
+        color: #7dd3fc;
+        font-size: 11px;
+        font-family: "Inter", sans-serif;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="top">
+        <h1>LED Calc — Font Preview</h1>
+        <p>
+          Tutti i candidati renderizzati con lo stesso contenuto reale
+          dell'app. Le card sono ordinate dalla scelta più "neutra" (Rubik
+          attuale) alle più caratterizzate "tech / stage / sci-fi".
+        </p>
+        <div class="legend">
+          <span>👆 Stat con risoluzione e cabinet</span>
+          <span>🔢 Numeri tabulari (tabular-nums)</span>
+          <span>🅰️ Caratteri di riferimento</span>
+        </div>
+      </header>
+
+      <div class="grid">
+        <!-- =================== TEMPLATE per ogni card =================== -->
+        <!-- Per ognuna: h1, sub, 2 stat (risoluzione + watt), chip cabinet, alfabeto -->
+
+        <!-- RUBIK (attuale) -->
+        <article class="card f-rubik">
+          <div class="card-head">
+            <span class="font-name">Rubik</span>
+            <span class="font-tag">attuale · friendly / rounded</span>
+          </div>
+          <div class="demo-h1">LED Calc</div>
+          <div class="demo-sub">Calcolatore pareti LED — risoluzione, cabinet.</div>
+          <div class="stat-row">
+            <div class="stat hl">
+              <div class="stat-label">Risoluzione</div>
+              <div class="stat-value">2.304 × 1.152</div>
+              <div class="stat-sub">192 × 192 px / cabinet</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Picco</div>
+              <div class="stat-value">32,40 kW</div>
+              <div class="stat-sub">140,9 A @ 230 V</div>
+            </div>
+          </div>
+          <div class="chip-row">
+            <span class="chip active">500 × 500</span>
+            <span class="chip">500 × 1000</span>
+            <span class="chip">600 × 337.5</span>
+          </div>
+          <div class="num-strip">0123456789 · 1.234,56</div>
+          <div class="alphabet">ABCDEFGHIJKLM nopqrstuvwxyz</div>
+        </article>
+
+        <!-- SPACE GROTESK -->
+        <article class="card f-space">
+          <div class="card-head">
+            <span class="font-name">Space Grotesk</span>
+            <span class="font-tag">geometric · modern tech</span>
+          </div>
+          <div class="demo-h1">LED Calc</div>
+          <div class="demo-sub">Calcolatore pareti LED — risoluzione, cabinet.</div>
+          <div class="stat-row">
+            <div class="stat hl">
+              <div class="stat-label">Risoluzione</div>
+              <div class="stat-value">2.304 × 1.152</div>
+              <div class="stat-sub">192 × 192 px / cabinet</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Picco</div>
+              <div class="stat-value">32,40 kW</div>
+              <div class="stat-sub">140,9 A @ 230 V</div>
+            </div>
+          </div>
+          <div class="chip-row">
+            <span class="chip active">500 × 500</span>
+            <span class="chip">500 × 1000</span>
+            <span class="chip">600 × 337.5</span>
+          </div>
+          <div class="num-strip">0123456789 · 1.234,56</div>
+          <div class="alphabet">ABCDEFGHIJKLM nopqrstuvwxyz</div>
+          <span class="pick">★ raccomandato</span>
+        </article>
+
+        <!-- GEIST -->
+        <article class="card f-geist">
+          <div class="card-head">
+            <span class="font-name">Geist Sans</span>
+            <span class="font-tag">Vercel · developer-tool neutro</span>
+          </div>
+          <div class="demo-h1">LED Calc</div>
+          <div class="demo-sub">Calcolatore pareti LED — risoluzione, cabinet.</div>
+          <div class="stat-row">
+            <div class="stat hl">
+              <div class="stat-label">Risoluzione</div>
+              <div class="stat-value">2.304 × 1.152</div>
+              <div class="stat-sub">192 × 192 px / cabinet</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Picco</div>
+              <div class="stat-value">32,40 kW</div>
+              <div class="stat-sub">140,9 A @ 230 V</div>
+            </div>
+          </div>
+          <div class="chip-row">
+            <span class="chip active">500 × 500</span>
+            <span class="chip">500 × 1000</span>
+            <span class="chip">600 × 337.5</span>
+          </div>
+          <div class="num-strip">0123456789 · 1.234,56</div>
+          <div class="alphabet">ABCDEFGHIJKLM nopqrstuvwxyz</div>
+        </article>
+
+        <!-- IBM PLEX SANS -->
+        <article class="card f-plex">
+          <div class="card-head">
+            <span class="font-name">IBM Plex Sans</span>
+            <span class="font-tag">corporate-tech · ottimi numeri</span>
+          </div>
+          <div class="demo-h1">LED Calc</div>
+          <div class="demo-sub">Calcolatore pareti LED — risoluzione, cabinet.</div>
+          <div class="stat-row">
+            <div class="stat hl">
+              <div class="stat-label">Risoluzione</div>
+              <div class="stat-value">2.304 × 1.152</div>
+              <div class="stat-sub">192 × 192 px / cabinet</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Picco</div>
+              <div class="stat-value">32,40 kW</div>
+              <div class="stat-sub">140,9 A @ 230 V</div>
+            </div>
+          </div>
+          <div class="chip-row">
+            <span class="chip active">500 × 500</span>
+            <span class="chip">500 × 1000</span>
+            <span class="chip">600 × 337.5</span>
+          </div>
+          <div class="num-strip">0123456789 · 1.234,56</div>
+          <div class="alphabet">ABCDEFGHIJKLM nopqrstuvwxyz</div>
+        </article>
+
+        <!-- DM SANS -->
+        <article class="card f-dm">
+          <div class="card-head">
+            <span class="font-name">DM Sans</span>
+            <span class="font-tag">clean · neutro moderno</span>
+          </div>
+          <div class="demo-h1">LED Calc</div>
+          <div class="demo-sub">Calcolatore pareti LED — risoluzione, cabinet.</div>
+          <div class="stat-row">
+            <div class="stat hl">
+              <div class="stat-label">Risoluzione</div>
+              <div class="stat-value">2.304 × 1.152</div>
+              <div class="stat-sub">192 × 192 px / cabinet</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Picco</div>
+              <div class="stat-value">32,40 kW</div>
+              <div class="stat-sub">140,9 A @ 230 V</div>
+            </div>
+          </div>
+          <div class="chip-row">
+            <span class="chip active">500 × 500</span>
+            <span class="chip">500 × 1000</span>
+            <span class="chip">600 × 337.5</span>
+          </div>
+          <div class="num-strip">0123456789 · 1.234,56</div>
+          <div class="alphabet">ABCDEFGHIJKLM nopqrstuvwxyz</div>
+        </article>
+
+        <!-- INTER -->
+        <article class="card f-inter">
+          <div class="card-head">
+            <span class="font-name">Inter</span>
+            <span class="font-tag">UI-standard · baseline neutra</span>
+          </div>
+          <div class="demo-h1">LED Calc</div>
+          <div class="demo-sub">Calcolatore pareti LED — risoluzione, cabinet.</div>
+          <div class="stat-row">
+            <div class="stat hl">
+              <div class="stat-label">Risoluzione</div>
+              <div class="stat-value">2.304 × 1.152</div>
+              <div class="stat-sub">192 × 192 px / cabinet</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Picco</div>
+              <div class="stat-value">32,40 kW</div>
+              <div class="stat-sub">140,9 A @ 230 V</div>
+            </div>
+          </div>
+          <div class="chip-row">
+            <span class="chip active">500 × 500</span>
+            <span class="chip">500 × 1000</span>
+            <span class="chip">600 × 337.5</span>
+          </div>
+          <div class="num-strip">0123456789 · 1.234,56</div>
+          <div class="alphabet">ABCDEFGHIJKLM nopqrstuvwxyz</div>
+        </article>
+
+        <!-- OUTFIT -->
+        <article class="card f-outfit">
+          <div class="card-head">
+            <span class="font-name">Outfit</span>
+            <span class="font-tag">futuristic · geometric</span>
+          </div>
+          <div class="demo-h1">LED Calc</div>
+          <div class="demo-sub">Calcolatore pareti LED — risoluzione, cabinet.</div>
+          <div class="stat-row">
+            <div class="stat hl">
+              <div class="stat-label">Risoluzione</div>
+              <div class="stat-value">2.304 × 1.152</div>
+              <div class="stat-sub">192 × 192 px / cabinet</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Picco</div>
+              <div class="stat-value">32,40 kW</div>
+              <div class="stat-sub">140,9 A @ 230 V</div>
+            </div>
+          </div>
+          <div class="chip-row">
+            <span class="chip active">500 × 500</span>
+            <span class="chip">500 × 1000</span>
+            <span class="chip">600 × 337.5</span>
+          </div>
+          <div class="num-strip">0123456789 · 1.234,56</div>
+          <div class="alphabet">ABCDEFGHIJKLM nopqrstuvwxyz</div>
+        </article>
+
+        <!-- SORA -->
+        <article class="card f-sora">
+          <div class="card-head">
+            <span class="font-name">Sora</span>
+            <span class="font-tag">geometric · spaziale moderno</span>
+          </div>
+          <div class="demo-h1">LED Calc</div>
+          <div class="demo-sub">Calcolatore pareti LED — risoluzione, cabinet.</div>
+          <div class="stat-row">
+            <div class="stat hl">
+              <div class="stat-label">Risoluzione</div>
+              <div class="stat-value">2.304 × 1.152</div>
+              <div class="stat-sub">192 × 192 px / cabinet</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Picco</div>
+              <div class="stat-value">32,40 kW</div>
+              <div class="stat-sub">140,9 A @ 230 V</div>
+            </div>
+          </div>
+          <div class="chip-row">
+            <span class="chip active">500 × 500</span>
+            <span class="chip">500 × 1000</span>
+            <span class="chip">600 × 337.5</span>
+          </div>
+          <div class="num-strip">0123456789 · 1.234,56</div>
+          <div class="alphabet">ABCDEFGHIJKLM nopqrstuvwxyz</div>
+        </article>
+
+        <!-- CHAKRA PETCH -->
+        <article class="card f-chakra">
+          <div class="card-head">
+            <span class="font-name">Chakra Petch</span>
+            <span class="font-tag">sci-fi · stage tech marcato</span>
+          </div>
+          <div class="demo-h1">LED Calc</div>
+          <div class="demo-sub">Calcolatore pareti LED — risoluzione, cabinet.</div>
+          <div class="stat-row">
+            <div class="stat hl">
+              <div class="stat-label">Risoluzione</div>
+              <div class="stat-value">2.304 × 1.152</div>
+              <div class="stat-sub">192 × 192 px / cabinet</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Picco</div>
+              <div class="stat-value">32,40 kW</div>
+              <div class="stat-sub">140,9 A @ 230 V</div>
+            </div>
+          </div>
+          <div class="chip-row">
+            <span class="chip active">500 × 500</span>
+            <span class="chip">500 × 1000</span>
+            <span class="chip">600 × 337.5</span>
+          </div>
+          <div class="num-strip">0123456789 · 1.234,56</div>
+          <div class="alphabet">ABCDEFGHIJKLM nopqrstuvwxyz</div>
+        </article>
+
+        <!-- ORBITRON -->
+        <article class="card f-orbitron">
+          <div class="card-head">
+            <span class="font-name">Orbitron</span>
+            <span class="font-tag">aggressivo · futuristic display</span>
+          </div>
+          <div class="demo-h1">LED Calc</div>
+          <div class="demo-sub" style="font-family: Inter, sans-serif">
+            (Orbitron è molto bold — meglio solo per heading/numeri grandi)
+          </div>
+          <div class="stat-row">
+            <div class="stat hl">
+              <div class="stat-label">Risoluzione</div>
+              <div class="stat-value">2.304 × 1.152</div>
+              <div class="stat-sub">192 × 192 px / cabinet</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Picco</div>
+              <div class="stat-value">32,40 kW</div>
+              <div class="stat-sub">140,9 A @ 230 V</div>
+            </div>
+          </div>
+          <div class="num-strip">0123456789 · 1.234,56</div>
+        </article>
+
+        <!-- JETBRAINS MONO (solo numeri) -->
+        <article class="card">
+          <div class="card-head">
+            <span class="font-name">JetBrains Mono</span>
+            <span class="font-tag">monospace · per numeri/risultati</span>
+          </div>
+          <div class="demo-h1 f-rubik">LED Calc</div>
+          <div class="demo-sub f-rubik">
+            Combo: Rubik per UI + JetBrains Mono solo sui numeri.
+          </div>
+          <div class="stat-row">
+            <div class="stat hl">
+              <div class="stat-label f-rubik">Risoluzione</div>
+              <div class="stat-value f-jetbrains">2.304 × 1.152</div>
+              <div class="stat-sub f-jetbrains">192 × 192 px / cabinet</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label f-rubik">Picco</div>
+              <div class="stat-value f-jetbrains">32,40 kW</div>
+              <div class="stat-sub f-jetbrains">140,9 A @ 230 V</div>
+            </div>
+          </div>
+          <div class="num-strip f-jetbrains">0123456789 · 1.234,56</div>
+          <div class="alphabet f-jetbrains">
+            ABCDEFGHIJKLM nopqrstuvwxyz
+          </div>
+        </article>
+
+        <!-- IBM PLEX MONO (solo numeri) -->
+        <article class="card">
+          <div class="card-head">
+            <span class="font-name">IBM Plex Mono</span>
+            <span class="font-tag">monospace · server-rack vibe</span>
+          </div>
+          <div class="demo-h1 f-plex">LED Calc</div>
+          <div class="demo-sub f-plex">
+            Combo: IBM Plex Sans + IBM Plex Mono per i numeri.
+          </div>
+          <div class="stat-row">
+            <div class="stat hl">
+              <div class="stat-label f-plex">Risoluzione</div>
+              <div class="stat-value f-plex-mono">2.304 × 1.152</div>
+              <div class="stat-sub f-plex-mono">192 × 192 px / cabinet</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label f-plex">Picco</div>
+              <div class="stat-value f-plex-mono">32,40 kW</div>
+              <div class="stat-sub f-plex-mono">140,9 A @ 230 V</div>
+            </div>
+          </div>
+          <div class="num-strip f-plex-mono">0123456789 · 1.234,56</div>
+          <div class="alphabet f-plex-mono">
+            ABCDEFGHIJKLM nopqrstuvwxyz
+          </div>
+        </article>
+      </div>
+    </div>
+  </body>
+</html>

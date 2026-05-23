@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LED Calc — 5 alternative UI/UX</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #161719;
+        --panel: #1c1d20;
+        --panel-2: #232427;
+        --border: #2a2c30;
+        --text: #f1f5f9;
+        --text-dim: #94a3b8;
+        --text-faint: #64748b;
+        --accent: #84cc16;
+        --accent-bright: #bef264;
+        --accent-rgb: 132, 204, 22;
+        --warn: #f59e0b;
+        --warn-rgb: 245, 158, 11;
+        --r: 14px;
+        --r-pill: 999px;
+        --font-ui: "Chakra Petch", system-ui, sans-serif;
+        --font-mono: "JetBrains Mono", monospace;
+      }
+      * { box-sizing: border-box; margin: 0; }
+      html, body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-ui);
+      }
+      body { padding: 32px 24px 80px; }
+      .page { max-width: 1500px; margin: 0 auto; }
+      .toc {
+        margin-bottom: 28px;
+      }
+      .toc h1 {
+        font-size: 26px; font-weight: 600;
+        letter-spacing: 0.04em; text-transform: uppercase;
+      }
+      .toc p {
+        margin-top: 8px; color: var(--text-dim);
+        font-size: 14px; max-width: 800px;
+      }
+      .toc-list {
+        margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap;
+      }
+      .toc-chip {
+        font-family: var(--font-mono);
+        font-size: 11px; padding: 6px 12px;
+        border: 1px solid var(--border); background: var(--panel-2);
+        color: var(--text-dim); border-radius: var(--r-pill);
+      }
+      .toc-chip a { color: inherit; text-decoration: none; }
+      .toc-chip:hover { color: var(--accent-bright); border-color: var(--accent); }
+
+      /* ============ THEME container ============ */
+      .theme {
+        margin-bottom: 32px;
+        border-radius: 22px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        overflow: hidden;
+      }
+      .theme-head {
+        display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+        padding: 16px 22px;
+        background: var(--panel-2);
+        border-bottom: 1px solid var(--border);
+      }
+      .theme-num {
+        font-family: var(--font-mono); font-size: 12px;
+        color: var(--accent); font-weight: 700;
+        background: rgba(var(--accent-rgb), 0.12);
+        padding: 4px 8px; border-radius: 6px;
+      }
+      .theme-name {
+        font-size: 18px; font-weight: 600;
+        text-transform: uppercase; letter-spacing: 0.06em;
+      }
+      .theme-desc {
+        flex: 1 1 100%; font-size: 13px; color: var(--text-dim);
+        line-height: 1.5; margin-top: 6px;
+      }
+      .ui-body { padding: 18px; }
+
+      /* ============ Common atoms ============ */
+      .panel {
+        background: var(--panel-2); border: 1px solid var(--border);
+        border-radius: var(--r); padding: 12px;
+      }
+      .h-section {
+        font-size: 10px; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.12em;
+        color: var(--text);
+        margin-bottom: 4px;
+      }
+      .h-section .sub {
+        font-size: 10px; font-weight: 500;
+        color: var(--text-faint); margin-left: 6px;
+        text-transform: none; letter-spacing: 0.02em;
+      }
+      .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+      .field label {
+        display: block;
+        font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em;
+        color: var(--text-dim); font-weight: 600; margin-bottom: 4px;
+      }
+      .input {
+        display: flex; align-items: center; height: 36px; padding: 0 12px;
+        background: var(--panel); border: 1px solid var(--border);
+        border-radius: 10px; font-family: var(--font-mono); font-size: 14px;
+      }
+      .input .v { flex: 1; color: var(--text); }
+      .input .suf { color: var(--text-faint); font-size: 11px; }
+      .chip {
+        font-family: var(--font-ui);
+        padding: 4px 10px; border-radius: var(--r-pill);
+        background: var(--panel); border: 1px solid var(--border);
+        color: var(--text-dim); font-size: 11px; font-weight: 500;
+      }
+      .chip.active {
+        background: rgba(var(--accent-rgb), 0.18);
+        border-color: var(--accent);
+        color: var(--accent-bright);
+      }
+      .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+      .stat {
+        background: var(--panel); border: 1px solid var(--border);
+        border-radius: 10px; padding: 8px 10px;
+      }
+      .stat.hl {
+        background: rgba(var(--accent-rgb), 0.1);
+        border-color: rgba(var(--accent-rgb), 0.4);
+      }
+      .stat .lbl {
+        font-size: 8px; text-transform: uppercase; letter-spacing: 0.08em;
+        color: var(--text-dim); font-weight: 600;
+      }
+      .stat .val {
+        font-family: var(--font-mono); font-weight: 600; font-size: 14px;
+        margin-top: 2px; color: var(--text);
+        font-variant-numeric: tabular-nums;
+      }
+      .stat.hl .val { color: var(--accent-bright); }
+      .stat .sub {
+        font-family: var(--font-mono); font-size: 10px;
+        margin-top: 1px; color: var(--text-faint);
+      }
+      .preview-svg {
+        background: var(--panel); border: 1px solid var(--border);
+        border-radius: 12px; padding: 8px; aspect-ratio: 2 / 1;
+      }
+      .preview-svg svg { width: 100%; height: 100%; display: block; }
+      .btn {
+        font-family: var(--font-ui); font-size: 12px; font-weight: 600;
+        padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border);
+        background: var(--panel); color: var(--text);
+        text-transform: uppercase; letter-spacing: 0.06em;
+      }
+      .btn.primary { background: var(--accent); border-color: var(--accent); color: #0a0a0a; }
+      .btn.ghost { background: transparent; }
+
+      /* ============ THEME 1 · Dashboard Split (current) ============ */
+      .t1-grid { display: grid; grid-template-columns: 5fr 7fr; gap: 14px; }
+      .t1-col { display: flex; flex-direction: column; gap: 10px; }
+      .t1-stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+
+      /* ============ THEME 2 · Wizard / Stepper ============ */
+      .t2-steps {
+        display: flex; align-items: center; gap: 0; margin-bottom: 18px;
+      }
+      .t2-step {
+        flex: 1; display: flex; align-items: center; gap: 10px;
+        padding: 12px 14px; border: 1px solid var(--border);
+        background: var(--panel-2); position: relative;
+      }
+      .t2-step:first-child { border-radius: 12px 0 0 12px; border-right: 0; }
+      .t2-step:last-child { border-radius: 0 12px 12px 0; }
+      .t2-step:not(:first-child):not(:last-child) { border-right: 0; }
+      .t2-step.done { background: rgba(var(--accent-rgb), 0.12); border-color: rgba(var(--accent-rgb), 0.5); }
+      .t2-step.current {
+        background: rgba(var(--accent-rgb), 0.22); border-color: var(--accent);
+        border-right: 1px solid var(--accent) !important;
+      }
+      .t2-step .n {
+        width: 24px; height: 24px; border-radius: 999px;
+        display: grid; place-items: center;
+        background: var(--panel); color: var(--text-dim);
+        font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+        border: 1px solid var(--border);
+      }
+      .t2-step.done .n, .t2-step.current .n { background: var(--accent); color: #0a0a0a; border-color: var(--accent); }
+      .t2-step .tx { font-size: 12px; color: var(--text-dim); }
+      .t2-step.done .tx, .t2-step.current .tx { color: var(--text); }
+      .t2-card {
+        background: var(--panel-2); border: 1px solid var(--border);
+        border-radius: 18px; padding: 24px; max-width: 720px; margin: 0 auto;
+      }
+      .t2-card h2 {
+        font-size: 22px; font-weight: 600;
+        letter-spacing: 0.04em; text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+      .t2-card .lead {
+        color: var(--text-dim); font-size: 14px; margin-bottom: 18px;
+      }
+      .t2-actions {
+        display: flex; justify-content: space-between; margin-top: 22px;
+      }
+      .t2-summary {
+        max-width: 720px; margin: 12px auto 0; padding: 10px 14px;
+        background: var(--panel); border: 1px dashed var(--border);
+        border-radius: 12px; font-family: var(--font-mono); font-size: 11px;
+        color: var(--text-faint);
+        display: flex; flex-wrap: wrap; gap: 14px;
+      }
+      .t2-summary b { color: var(--text); font-weight: 600; }
+
+      /* ============ THEME 3 · Canvas-first ============ */
+      .t3 { display: grid; grid-template-columns: 1fr 320px; gap: 14px; }
+      .t3-canvas {
+        position: relative;
+        background: var(--panel-2); border: 1px solid var(--border);
+        border-radius: 16px; padding: 14px;
+        min-height: 460px;
+        display: flex; flex-direction: column;
+      }
+      .t3-toolbar {
+        display: flex; gap: 8px; align-items: center; margin-bottom: 10px;
+        padding-bottom: 10px; border-bottom: 1px solid var(--border);
+      }
+      .t3-toolbar .pill {
+        display: inline-flex; padding: 2px;
+        border: 1px solid var(--border); background: var(--panel);
+        border-radius: var(--r-pill);
+      }
+      .t3-toolbar .pill button {
+        background: none; border: 0; padding: 4px 10px;
+        font-family: var(--font-ui); font-size: 11px; font-weight: 600;
+        color: var(--text-dim); border-radius: var(--r-pill);
+        text-transform: uppercase; letter-spacing: 0.06em;
+      }
+      .t3-toolbar .pill button.active {
+        background: var(--accent); color: #0a0a0a;
+      }
+      .t3-canvas .preview-svg {
+        flex: 1; aspect-ratio: unset; min-height: 320px;
+      }
+      .t3-statbar {
+        display: flex; gap: 8px; margin-top: 10px;
+      }
+      .t3-statbar .stat { flex: 1; }
+      .t3-panels { display: flex; flex-direction: column; gap: 8px; }
+      .t3-acc {
+        background: var(--panel-2); border: 1px solid var(--border);
+        border-radius: var(--r);
+      }
+      .t3-acc-head {
+        padding: 10px 14px; display: flex; justify-content: space-between;
+        align-items: center; cursor: default;
+      }
+      .t3-acc-body { padding: 0 14px 14px; }
+      .t3-acc-head .chevron { color: var(--accent); font-family: var(--font-mono); }
+      .t3-acc.closed .t3-acc-body { display: none; }
+
+      /* ============ THEME 4 · Hardware Console ============ */
+      .t4 {
+        background: linear-gradient(180deg, #1c1d20 0%, #161719 100%);
+        border-radius: 16px;
+        padding: 18px;
+        border: 1px solid var(--border);
+      }
+      .t4-lcd {
+        background: #0d0e0e;
+        border: 1px solid #2a2c30;
+        border-radius: 12px;
+        padding: 18px 22px;
+        box-shadow: inset 0 0 24px rgba(var(--accent-rgb), 0.08);
+        display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 22px;
+        margin-bottom: 16px;
+      }
+      .t4-lcd .big {
+        color: var(--accent-bright);
+        font-family: var(--font-mono);
+        font-weight: 700; font-size: 36px;
+        letter-spacing: 0.04em;
+        text-shadow: 0 0 18px rgba(var(--accent-rgb), 0.6);
+        font-variant-numeric: tabular-nums;
+      }
+      .t4-lcd .lbl {
+        font-family: var(--font-ui); font-size: 10px;
+        text-transform: uppercase; letter-spacing: 0.18em;
+        color: var(--text-dim);
+        margin-bottom: 4px;
+      }
+      .t4-lcd .med {
+        color: var(--accent);
+        font-family: var(--font-mono);
+        font-weight: 600; font-size: 22px;
+        text-shadow: 0 0 12px rgba(var(--accent-rgb), 0.5);
+      }
+      .t4-knobs {
+        display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+      }
+      .t4-knob {
+        background: var(--panel); border: 1px solid var(--border);
+        border-radius: 10px; padding: 10px 12px;
+      }
+      .t4-knob .lbl {
+        font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em;
+        color: var(--text-dim); font-weight: 600; margin-bottom: 6px;
+      }
+      .t4-knob .v {
+        font-family: var(--font-mono); font-weight: 600; font-size: 13px;
+        color: var(--text);
+      }
+      .t4-status {
+        margin-top: 14px; padding: 10px 14px;
+        background: #0d0e0e; border: 1px solid #2a2c30; border-radius: 10px;
+        display: flex; gap: 18px; align-items: center;
+      }
+      .t4-led {
+        display: flex; align-items: center; gap: 6px;
+        font-family: var(--font-mono); font-size: 10px;
+        text-transform: uppercase; letter-spacing: 0.1em;
+        color: var(--text-dim);
+      }
+      .t4-led .dot {
+        width: 8px; height: 8px; border-radius: 999px;
+        background: var(--accent); box-shadow: 0 0 8px var(--accent);
+      }
+      .t4-led .dot.dim { background: var(--text-faint); box-shadow: none; }
+      .t4-led .dot.warn { background: var(--warn); box-shadow: 0 0 8px var(--warn); }
+
+      /* ============ THEME 5 · Compare scenarios ============ */
+      .t5-bar { display: flex; gap: 8px; margin-bottom: 12px; }
+      .t5-table {
+        width: 100%; border-collapse: separate; border-spacing: 0;
+        background: var(--panel-2);
+        border: 1px solid var(--border); border-radius: var(--r);
+        overflow: hidden;
+      }
+      .t5-table th, .t5-table td {
+        padding: 10px 14px; text-align: left;
+        border-bottom: 1px solid var(--border);
+        font-family: var(--font-mono); font-size: 12px;
+        font-variant-numeric: tabular-nums;
+      }
+      .t5-table th {
+        background: var(--panel);
+        font-family: var(--font-ui);
+        text-transform: uppercase; letter-spacing: 0.06em;
+        font-size: 11px; color: var(--text);
+        border-bottom: 1px solid var(--border);
+      }
+      .t5-table td:first-child {
+        font-family: var(--font-ui);
+        color: var(--text-dim);
+        font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+        background: var(--panel);
+        font-weight: 500;
+      }
+      .t5-table tr.section td { background: rgba(var(--accent-rgb), 0.08); color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; font-size: 10px; }
+      .t5-table tr:last-child td { border-bottom: 0; }
+      .t5-table .best { color: var(--accent-bright); font-weight: 700; }
+      .t5-table .col-hl { background: rgba(var(--accent-rgb), 0.05); }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="toc">
+        <h1>LED Calc — 5 alternative UI/UX</h1>
+        <p>
+          Stessa palette/font (Chakra Petch + JetBrains Mono + verde Resolume) per
+          eliminare il rumore visivo: la variabile sono <b>il layout e il
+          flusso di interazione</b>. Ogni alternativa è progettata per un
+          contesto d'uso diverso.
+        </p>
+        <div class="toc-list">
+          <span class="toc-chip"><a href="#t1">① Dashboard Split (attuale)</a></span>
+          <span class="toc-chip"><a href="#t2">② Wizard / Stepper</a></span>
+          <span class="toc-chip"><a href="#t3">③ Canvas-First</a></span>
+          <span class="toc-chip"><a href="#t4">④ Hardware Console</a></span>
+          <span class="toc-chip"><a href="#t5">⑤ Compare Scenarios</a></span>
+        </div>
+      </header>
+
+      <!-- ============ THEME 1 ============ -->
+      <article id="t1" class="theme">
+        <div class="theme-head">
+          <span class="theme-num">01</span>
+          <span class="theme-name">Dashboard Split <em style="font-style:normal;color:var(--text-faint);font-size:13px;">(attuale)</em></span>
+          <div class="theme-desc">
+            Tutto visibile insieme. A sinistra i campi di setup, a destra preview + numeri.
+            Pensato per <b>tecnici che lavorano a vista su desktop</b> — tipico tool da regia.
+            Pro: ogni cambio ricalcola live e vedi subito impatto. Contro: su mobile diventa molto verticale.
+          </div>
+        </div>
+        <div class="ui-body">
+          <div class="t1-grid">
+            <div class="t1-col">
+              <div class="panel">
+                <div class="h-section">Muro <span class="sub">in mm</span></div>
+                <div class="field-row">
+                  <div class="field"><label>Larghezza</label><div class="input"><span class="v">6000</span><span class="suf">mm</span></div></div>
+                  <div class="field"><label>Altezza</label><div class="input"><span class="v">3000</span><span class="suf">mm</span></div></div>
+                </div>
+              </div>
+              <div class="panel">
+                <div class="h-section">Cabinet</div>
+                <div class="chip-row" style="margin-top:6px;">
+                  <span class="chip active">500 × 500</span>
+                  <span class="chip">1000 × 500</span>
+                  <span class="chip">600 × 600</span>
+                  <span class="chip">1200 × 1200</span>
+                </div>
+              </div>
+              <div class="panel">
+                <div class="h-section">Pitch / Source</div>
+                <div class="chip-row" style="margin-top:6px;">
+                  <span class="chip active">P2.6</span>
+                  <span class="chip">16:9</span>
+                  <span class="chip">Custom</span>
+                </div>
+              </div>
+            </div>
+            <div class="t1-col">
+              <div class="preview-svg">
+                <svg viewBox="0 0 200 100" preserveAspectRatio="xMidYMid meet">
+                  <rect x="0" y="0" width="200" height="100" fill="rgba(var(--accent-rgb), 0.05)" stroke="rgba(var(--accent-rgb), 0.7)" stroke-width="0.5"/>
+                  <g stroke="rgba(var(--accent-rgb), 0.35)" stroke-width="0.4">
+                    <line x1="33" y1="0" x2="33" y2="100"/><line x1="67" y1="0" x2="67" y2="100"/><line x1="100" y1="0" x2="100" y2="100"/><line x1="133" y1="0" x2="133" y2="100"/><line x1="167" y1="0" x2="167" y2="100"/>
+                    <line x1="0" y1="33" x2="200" y2="33"/><line x1="0" y1="67" x2="200" y2="67"/>
+                  </g>
+                  <rect x="11" y="6" width="178" height="88" fill="rgba(var(--accent-rgb), 0.25)" stroke="rgba(var(--accent-rgb), 0.95)" stroke-width="0.7"/>
+                </svg>
+              </div>
+              <div class="t1-stats">
+                <div class="stat"><div class="lbl">Cab</div><div class="val">12×6</div><div class="sub">72</div></div>
+                <div class="stat hl"><div class="lbl">Risoluzione</div><div class="val">2304×1152</div><div class="sub">192/cab</div></div>
+                <div class="stat"><div class="lbl">Aspect</div><div class="val">2:1</div><div class="sub">2.00:1</div></div>
+                <div class="stat"><div class="lbl">Mpx</div><div class="val">2,65</div><div class="sub">2.6 M px</div></div>
+                <div class="stat"><div class="lbl">Picco</div><div class="val">32,4 kW</div><div class="sub">141 A</div></div>
+                <div class="stat"><div class="lbl">Visione</div><div class="val">2,6 m</div><div class="sub">8,5 ft</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ============ THEME 2 ============ -->
+      <article id="t2" class="theme">
+        <div class="theme-head">
+          <span class="theme-num">02</span>
+          <span class="theme-name">Wizard / Stepper</span>
+          <div class="theme-desc">
+            Un parametro alla volta, guidato. Step in alto come progress bar.
+            Pensato per <b>chi non è esperto del dominio</b> (sales engineer,
+            project manager) o per un <b>uso mobile</b> dove i campi devono essere grandi.
+            Pro: zero overload, ogni schermo è chiarissimo. Contro: più click per un risultato.
+          </div>
+        </div>
+        <div class="ui-body">
+          <div class="t2-steps">
+            <div class="t2-step done"><span class="n">1</span><span class="tx">Muro</span></div>
+            <div class="t2-step done"><span class="n">2</span><span class="tx">Cabinet</span></div>
+            <div class="t2-step current"><span class="n">3</span><span class="tx">Pixel pitch</span></div>
+            <div class="t2-step"><span class="n">4</span><span class="tx">Source content</span></div>
+            <div class="t2-step"><span class="n">5</span><span class="tx">Risultato</span></div>
+          </div>
+
+          <div class="t2-card">
+            <h2>Step 3 · Pixel pitch</h2>
+            <p class="lead">Distanza in mm tra due pixel. Più piccolo = più definito, ma anche più cabinet/pixel a parità di muro.</p>
+            <div class="chip-row" style="gap:8px;">
+              <span class="chip">P1.2</span>
+              <span class="chip">P1.5</span>
+              <span class="chip">P1.9</span>
+              <span class="chip active">P2.6</span>
+              <span class="chip">P2.9</span>
+              <span class="chip">P3.9</span>
+              <span class="chip">Custom</span>
+            </div>
+            <div style="margin-top:18px;padding:14px;background:var(--panel);border:1px solid var(--border);border-radius:12px;">
+              <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Anteprima impatto su questo step</div>
+              <div style="font-family:var(--font-mono);font-size:14px;color:var(--text);">
+                Risoluzione <span style="color:var(--accent-bright);">2304 × 1152</span> · Distanza visione minima <span style="color:var(--accent-bright);">2,6 m</span>
+              </div>
+            </div>
+            <div class="t2-actions">
+              <button class="btn ghost">← Indietro</button>
+              <button class="btn primary">Continua →</button>
+            </div>
+          </div>
+
+          <div class="t2-summary">
+            <span><b>Muro:</b> 6000 × 3000 mm</span>
+            <span><b>Cabinet:</b> 500 × 500 mm</span>
+            <span><b>Pitch:</b> P2.6</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- ============ THEME 3 ============ -->
+      <article id="t3" class="theme">
+        <div class="theme-head">
+          <span class="theme-num">03</span>
+          <span class="theme-name">Canvas-First</span>
+          <div class="theme-desc">
+            Il preview è <b>il protagonista</b>, occupa la maggior parte della pagina.
+            Pannelli accordion sulla destra per editare i parametri, statbar in basso.
+            Pensato per <b>chi pensa visivamente</b> — vedi la parete e la trasformi, come in un tool di design.
+            Pro: massima percezione spaziale. Contro: meno numeri visibili insieme.
+          </div>
+        </div>
+        <div class="ui-body">
+          <div class="t3">
+            <div class="t3-canvas">
+              <div class="t3-toolbar">
+                <div class="pill">
+                  <button class="active">mm</button>
+                  <button>m</button>
+                  <button>pan</button>
+                </div>
+                <div style="flex:1"></div>
+                <div class="pill">
+                  <button>—</button>
+                  <button class="active">Fit</button>
+                  <button>Fill</button>
+                </div>
+              </div>
+              <div class="preview-svg">
+                <svg viewBox="0 0 200 100" preserveAspectRatio="xMidYMid meet">
+                  <rect x="0" y="0" width="200" height="100" fill="rgba(var(--accent-rgb), 0.05)" stroke="rgba(var(--accent-rgb), 0.7)" stroke-width="0.5"/>
+                  <g stroke="rgba(var(--accent-rgb), 0.35)" stroke-width="0.4">
+                    <line x1="33" y1="0" x2="33" y2="100"/><line x1="67" y1="0" x2="67" y2="100"/><line x1="100" y1="0" x2="100" y2="100"/><line x1="133" y1="0" x2="133" y2="100"/><line x1="167" y1="0" x2="167" y2="100"/>
+                    <line x1="0" y1="33" x2="200" y2="33"/><line x1="0" y1="67" x2="200" y2="67"/>
+                  </g>
+                  <rect x="11" y="6" width="178" height="88" fill="rgba(var(--accent-rgb), 0.25)" stroke="rgba(var(--accent-rgb), 0.95)" stroke-width="0.7"/>
+                </svg>
+              </div>
+              <div class="t3-statbar">
+                <div class="stat hl"><div class="lbl">Risoluzione</div><div class="val">2304 × 1152</div></div>
+                <div class="stat"><div class="lbl">Cabinet</div><div class="val">12 × 6 · 72</div></div>
+                <div class="stat"><div class="lbl">Aspect</div><div class="val">2:1</div></div>
+                <div class="stat"><div class="lbl">Mpx</div><div class="val">2,65</div></div>
+                <div class="stat"><div class="lbl">Picco</div><div class="val">32,4 kW</div></div>
+              </div>
+            </div>
+            <div class="t3-panels">
+              <div class="t3-acc">
+                <div class="t3-acc-head"><div class="h-section">Muro</div><span class="chevron">▾</span></div>
+                <div class="t3-acc-body">
+                  <div class="field-row">
+                    <div class="field"><label>L</label><div class="input"><span class="v">6000</span><span class="suf">mm</span></div></div>
+                    <div class="field"><label>H</label><div class="input"><span class="v">3000</span><span class="suf">mm</span></div></div>
+                  </div>
+                </div>
+              </div>
+              <div class="t3-acc">
+                <div class="t3-acc-head"><div class="h-section">Cabinet</div><span class="chevron">▾</span></div>
+                <div class="t3-acc-body">
+                  <div class="chip-row">
+                    <span class="chip active">500×500</span>
+                    <span class="chip">600×600</span>
+                    <span class="chip">1200×1200</span>
+                  </div>
+                </div>
+              </div>
+              <div class="t3-acc closed">
+                <div class="t3-acc-head"><div class="h-section">Pitch · P2.6</div><span class="chevron">▸</span></div>
+                <div class="t3-acc-body"></div>
+              </div>
+              <div class="t3-acc closed">
+                <div class="t3-acc-head"><div class="h-section">Source · 16:9</div><span class="chevron">▸</span></div>
+                <div class="t3-acc-body"></div>
+              </div>
+              <div class="t3-acc closed">
+                <div class="t3-acc-head"><div class="h-section">Stime · 8 kg / 150 W</div><span class="chevron">▸</span></div>
+                <div class="t3-acc-body"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ============ THEME 4 ============ -->
+      <article id="t4" class="theme">
+        <div class="theme-head">
+          <span class="theme-num">04</span>
+          <span class="theme-name">Hardware Console</span>
+          <div class="theme-desc">
+            Look <b>da processore LED fisico</b> (Brompton, Megapixel, Novastar) —
+            display LCD verde fosforo enorme con i numeri chiave, sotto "knob"/parametri,
+            barra LED di stato. Pensato per <b>palco/regia</b>: si legge da lontano,
+            fa sentire l'utente "ai comandi". Pro: numeri leggibili a colpo d'occhio.
+            Contro: meno densità di funzioni, più nostalgico.
+          </div>
+        </div>
+        <div class="ui-body">
+          <div class="t4">
+            <div class="t4-lcd">
+              <div>
+                <div class="lbl">Resolution</div>
+                <div class="big">2304 × 1152</div>
+              </div>
+              <div>
+                <div class="lbl">Cabinets</div>
+                <div class="med">12 × 6 · 72</div>
+                <div class="lbl" style="margin-top:10px;">Aspect</div>
+                <div class="med">2.00 : 1</div>
+              </div>
+              <div>
+                <div class="lbl">Power · peak</div>
+                <div class="med">32.4 kW</div>
+                <div class="lbl" style="margin-top:10px;">Weight</div>
+                <div class="med">576 kg</div>
+              </div>
+            </div>
+            <div class="t4-knobs">
+              <div class="t4-knob"><div class="lbl">Wall W</div><div class="v">6000 mm</div></div>
+              <div class="t4-knob"><div class="lbl">Wall H</div><div class="v">3000 mm</div></div>
+              <div class="t4-knob"><div class="lbl">Cab</div><div class="v">500×500</div></div>
+              <div class="t4-knob"><div class="lbl">Pitch</div><div class="v">P2.6</div></div>
+              <div class="t4-knob"><div class="lbl">Source</div><div class="v">16:9 · Fit</div></div>
+            </div>
+            <div class="t4-status">
+              <div class="t4-led"><span class="dot"></span>SYNC LOCK</div>
+              <div class="t4-led"><span class="dot"></span>POWER OK</div>
+              <div class="t4-led"><span class="dot warn"></span>+500 MM OVERFLOW</div>
+              <div class="t4-led"><span class="dot dim"></span>FILL MODE</div>
+              <div style="margin-left:auto;font-family:var(--font-mono);font-size:11px;color:var(--text-faint);">v0.1 · 23-05-26</div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ============ THEME 5 ============ -->
+      <article id="t5" class="theme">
+        <div class="theme-head">
+          <span class="theme-num">05</span>
+          <span class="theme-name">Compare Scenarios</span>
+          <div class="theme-desc">
+            Tabella per <b>confrontare più configurazioni in parallelo</b>:
+            es. "P2.6 vs P1.9 sullo stesso muro", o "500×500 vs 600×600 a parità di tutto".
+            Ogni colonna è uno scenario salvato. Le righe sono i parametri + outputs.
+            Pensato per <b>preventivi/offerta cliente</b>. Pro: confronto immediato.
+            Contro: nessun preview spaziale.
+          </div>
+        </div>
+        <div class="ui-body">
+          <div class="t5-bar">
+            <button class="btn primary">+ Aggiungi scenario</button>
+            <button class="btn ghost">Duplica B</button>
+            <button class="btn ghost">Esporta CSV</button>
+          </div>
+          <table class="t5-table">
+            <thead>
+              <tr>
+                <th style="width: 200px;">Parametro</th>
+                <th>A · Stage Main</th>
+                <th class="col-hl">B · Stage Main (P1.9)</th>
+                <th>C · Lobby</th>
+                <th>D · Backstage 9:16</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="section"><td colspan="5">Setup</td></tr>
+              <tr><td>Muro (m)</td><td>6.00 × 3.00</td><td class="col-hl">6.00 × 3.00</td><td>4.00 × 2.50</td><td>1.50 × 2.67</td></tr>
+              <tr><td>Cabinet</td><td>500 × 500</td><td class="col-hl">500 × 500</td><td>600 × 600</td><td>500 × 1000</td></tr>
+              <tr><td>Pitch</td><td>P2.6</td><td class="col-hl">P1.9</td><td>P3.9</td><td>P2.6</td></tr>
+              <tr><td>Source</td><td>16:9 Fit</td><td class="col-hl">16:9 Fit</td><td>4:3 Fill</td><td>9:16 Fit</td></tr>
+
+              <tr class="section"><td colspan="5">Risultato</td></tr>
+              <tr><td>Cabinet</td><td>12 × 6 · 72</td><td class="col-hl">12 × 6 · 72</td><td>7 × 5 · 35</td><td>3 × 3 · 9</td></tr>
+              <tr><td>Risoluzione</td><td>2304 × 1152</td><td class="col-hl best">3156 × 1578</td><td>1071 × 770</td><td>576 × 1152</td></tr>
+              <tr><td>Megapixel</td><td>2.65</td><td class="col-hl best">4.98</td><td>0.82</td><td>0.66</td></tr>
+              <tr><td>Aspect</td><td>2.00:1</td><td class="col-hl">2.00:1</td><td>1.39:1</td><td>0.50:1</td></tr>
+
+              <tr class="section"><td colspan="5">Carichi</td></tr>
+              <tr><td>Peso (kg)</td><td>576</td><td class="col-hl">576</td><td>280</td><td>72</td></tr>
+              <tr><td>Picco (kW)</td><td>32.4</td><td class="col-hl">32.4</td><td>15.8</td><td>4.1</td></tr>
+              <tr><td>Picco (A @ 230 V)</td><td>140.9</td><td class="col-hl">140.9</td><td>68.5</td><td>17.6</td></tr>
+              <tr><td>Visione (m)</td><td>2.6</td><td class="col-hl best">1.9</td><td>3.9</td><td>2.6</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <footer style="margin-top:32px;color:#64748b;font-size:12px;text-align:center;">
+        Tutti i mockup sono statici (HTML/CSS). Quando scegli, faccio lo swap nell'app vera.
+      </footer>
+    </div>
+  </body>
+</html>

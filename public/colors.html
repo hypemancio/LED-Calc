@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LED Calc — palette colori acide a confronto</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #161719;
+        --panel: #1c1d20;
+        --panel-2: #232427;
+        --border: #2a2c30;
+        --text: #f1f5f9;
+        --text-dim: #94a3b8;
+        --text-faint: #64748b;
+        --font-ui: "Chakra Petch", system-ui, sans-serif;
+        --font-mono: "JetBrains Mono", monospace;
+      }
+      * { box-sizing: border-box; margin: 0; }
+      html, body {
+        background: var(--bg); color: var(--text);
+        font-family: var(--font-ui);
+      }
+      body { padding: 32px 24px 80px; }
+      .page { max-width: 1280px; margin: 0 auto; }
+      header.top { margin-bottom: 28px; }
+      header.top h1 {
+        font-size: 26px; font-weight: 600;
+        text-transform: uppercase; letter-spacing: 0.04em;
+      }
+      header.top p {
+        margin-top: 8px; color: var(--text-dim);
+        font-size: 14px; max-width: 800px; line-height: 1.5;
+      }
+
+      .proposal {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 18px 20px;
+        margin-bottom: 18px;
+      }
+      .proposal-head {
+        display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+        margin-bottom: 14px;
+        padding-bottom: 12px; border-bottom: 1px solid var(--border);
+      }
+      .p-num {
+        font-family: var(--font-mono); font-size: 12px;
+        background: rgba(132, 204, 22, 0.12);
+        color: #84cc16; font-weight: 700;
+        padding: 4px 8px; border-radius: 6px;
+      }
+      .p-name {
+        font-size: 17px; font-weight: 600;
+        text-transform: uppercase; letter-spacing: 0.06em;
+      }
+      .p-desc {
+        font-size: 13px; color: var(--text-dim);
+        flex: 1 1 100%; margin-top: 6px; line-height: 1.4;
+      }
+
+      .proposal-grid {
+        display: grid; grid-template-columns: 280px 1fr 1fr; gap: 18px;
+      }
+      .legend {
+        display: flex; flex-direction: column; gap: 10px;
+      }
+      .swatch-row {
+        display: flex; align-items: center; gap: 12px;
+        padding: 10px; background: var(--panel-2);
+        border: 1px solid var(--border); border-radius: 10px;
+      }
+      .swatch {
+        width: 30px; height: 30px; border-radius: 8px;
+        flex: none;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4) inset;
+      }
+      .swatch-row .meta {
+        display: flex; flex-direction: column; gap: 1px;
+      }
+      .swatch-row .lbl {
+        font-size: 11px; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.08em;
+        color: var(--text);
+      }
+      .swatch-row .hex {
+        font-family: var(--font-mono); font-size: 10px;
+        color: var(--text-faint);
+      }
+      .preview-block {
+        background: var(--panel-2);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 10px;
+        display: flex; flex-direction: column; gap: 6px;
+      }
+      .preview-block .pl {
+        font-size: 10px; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.12em;
+        color: var(--text-dim);
+        font-family: var(--font-mono);
+      }
+      .preview-block svg {
+        width: 100%; height: auto; display: block;
+        background: #0d0e0e;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+      }
+
+      @media (max-width: 900px) {
+        .proposal-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="top">
+        <h1>Palette colori acide a confronto</h1>
+        <p>
+          Il <b>verde Resolume #84cc16</b> resta come accent principale e segna
+          la <b>struttura fisica del LED wall</b> (griglia cabinet, bordo della
+          parete reale). Le altre 3 tonalità — sempre nello stesso registro acido —
+          differenziano <b>Fit</b>, <b>Fill</b> e il <b>muro richiesto</b> (quando
+          non coincide con la parete reale).
+        </p>
+        <p style="margin-top:8px;">
+          Ogni proposta mostra: legenda con swatch + due anteprime affiancate
+          (una in modalità Fit, una in modalità Fill). La sorgente di test è 16:9
+          su muro 2:1 (default app) — quindi vedrai letterbox a sinistra/destra
+          in Fit e crop verticale in Fill.
+        </p>
+      </header>
+
+      <!-- ============ PROPOSAL A · Spectrum Analog ============ -->
+      <article class="proposal" style="--c-wall:#84cc16; --c-fit:#facc15; --c-fill:#fb923c; --c-req:#ec4899;">
+        <div class="proposal-head">
+          <span class="p-num">A</span>
+          <span class="p-name">Spectrum Analog</span>
+          <p class="p-desc">
+            Colori vicini sulla ruota cromatica — passaggio "Lime → Giallo → Arancio → Rosa". Coerente e morbido,
+            ma <b>Fit/Fill rischiano di confondersi</b> se affiancati in piccole dimensioni. Funziona bene se mostri un overlay alla volta.
+          </p>
+        </div>
+        <div class="proposal-grid">
+          <div class="legend">
+            <div class="swatch-row"><div class="swatch" style="background:#84cc16"></div><div class="meta"><div class="lbl">LED wall · cabinet</div><div class="hex">#84cc16 · lime</div></div></div>
+            <div class="swatch-row"><div class="swatch" style="background:#facc15"></div><div class="meta"><div class="lbl">Fit</div><div class="hex">#facc15 · volt yellow</div></div></div>
+            <div class="swatch-row"><div class="swatch" style="background:#fb923c"></div><div class="meta"><div class="lbl">Fill</div><div class="hex">#fb923c · acid orange</div></div></div>
+            <div class="swatch-row"><div class="swatch" style="background:#ec4899"></div><div class="meta"><div class="lbl">Muro richiesto · overflow</div><div class="hex">#ec4899 · hot pink</div></div></div>
+          </div>
+          <div class="preview-block">
+            <div class="pl">Fit · letterbox</div>
+            <svg viewBox="0 0 200 100">
+              <rect x="0" y="0" width="200" height="100" fill="rgba(132,204,22,0.05)" stroke="#84cc16" stroke-width="0.5" stroke-opacity="0.8"/>
+              <g stroke="#84cc16" stroke-opacity="0.3" stroke-width="0.4"><line x1="33" y1="0" x2="33" y2="100"/><line x1="67" y1="0" x2="67" y2="100"/><line x1="100" y1="0" x2="100" y2="100"/><line x1="133" y1="0" x2="133" y2="100"/><line x1="167" y1="0" x2="167" y2="100"/><line x1="0" y1="33" x2="200" y2="33"/><line x1="0" y1="67" x2="200" y2="67"/></g>
+              <rect x="11" y="6" width="178" height="88" fill="#facc15" fill-opacity="0.25" stroke="#facc15" stroke-width="0.7"/>
+              <rect x="0" y="0" width="190" height="95" fill="none" stroke="#ec4899" stroke-width="0.6" stroke-dasharray="3 2"/>
+            </svg>
+          </div>
+          <div class="preview-block">
+            <div class="pl">Fill · crop</div>
+            <svg viewBox="0 0 200 100">
+              <defs><clipPath id="ca"><rect x="0" y="0" width="200" height="100"/></clipPath></defs>
+              <rect x="0" y="0" width="200" height="100" fill="rgba(132,204,22,0.05)" stroke="#84cc16" stroke-width="0.5" stroke-opacity="0.8"/>
+              <g stroke="#84cc16" stroke-opacity="0.3" stroke-width="0.4"><line x1="33" y1="0" x2="33" y2="100"/><line x1="67" y1="0" x2="67" y2="100"/><line x1="100" y1="0" x2="100" y2="100"/><line x1="133" y1="0" x2="133" y2="100"/><line x1="167" y1="0" x2="167" y2="100"/><line x1="0" y1="33" x2="200" y2="33"/><line x1="0" y1="67" x2="200" y2="67"/></g>
+              <rect x="0" y="-6" width="200" height="112" fill="#fb923c" fill-opacity="0.22" clip-path="url(#ca)"/>
+              <rect x="0" y="-6" width="200" height="112" fill="none" stroke="#fb923c" stroke-width="0.7" stroke-dasharray="3 2"/>
+              <rect x="0" y="0" width="190" height="95" fill="none" stroke="#ec4899" stroke-width="0.6" stroke-dasharray="3 2"/>
+            </svg>
+          </div>
+        </div>
+      </article>
+
+      <!-- ============ PROPOSAL B · Neon Triad ============ -->
+      <article class="proposal" style="--c-wall:#84cc16; --c-fit:#22d3ee; --c-fill:#d946ef; --c-req:#fbbf24;">
+        <div class="proposal-head">
+          <span class="p-num">B</span>
+          <span class="p-name">Neon Triad</span>
+          <p class="p-desc">
+            Triade lime / ciano / magenta — <b>massimo contrasto</b> tra Fit e Fill, leggibilità ottimale anche in dimensioni piccole.
+            Vibe arcade/club anni '80. La mia raccomandazione se conta la <b>chiarezza funzionale</b>.
+          </p>
+        </div>
+        <div class="proposal-grid">
+          <div class="legend">
+            <div class="swatch-row"><div class="swatch" style="background:#84cc16"></div><div class="meta"><div class="lbl">LED wall · cabinet</div><div class="hex">#84cc16 · lime</div></div></div>
+            <div class="swatch-row"><div class="swatch" style="background:#22d3ee"></div><div class="meta"><div class="lbl">Fit</div><div class="hex">#22d3ee · electric cyan</div></div></div>
+            <div class="swatch-row"><div class="swatch" style="background:#d946ef"></div><div class="meta"><div class="lbl">Fill</div><div class="hex">#d946ef · acid magenta</div></div></div>
+            <div class="swatch-row"><div class="swatch" style="background:#fbbf24"></div><div class="meta"><div class="lbl">Muro richiesto · overflow</div><div class="hex">#fbbf24 · amber</div></div></div>
+          </div>
+          <div class="preview-block">
+            <div class="pl">Fit · letterbox</div>
+            <svg viewBox="0 0 200 100">
+              <rect x="0" y="0" width="200" height="100" fill="rgba(132,204,22,0.05)" stroke="#84cc16" stroke-width="0.5" stroke-opacity="0.8"/>
+              <g stroke="#84cc16" stroke-opacity="0.3" stroke-width="0.4"><line x1="33" y1="0" x2="33" y2="100"/><line x1="67" y1="0" x2="67" y2="100"/><line x1="100" y1="0" x2="100" y2="100"/><line x1="133" y1="0" x2="133" y2="100"/><line x1="167" y1="0" x2="167" y2="100"/><line x1="0" y1="33" x2="200" y2="33"/><line x1="0" y1="67" x2="200" y2="67"/></g>
+              <rect x="11" y="6" width="178" height="88" fill="#22d3ee" fill-opacity="0.22" stroke="#22d3ee" stroke-width="0.7"/>
+              <rect x="0" y="0" width="190" height="95" fill="none" stroke="#fbbf24" stroke-width="0.6" stroke-dasharray="3 2"/>
+            </svg>
+          </div>
+          <div class="preview-block">
+            <div class="pl">Fill · crop</div>
+            <svg viewBox="0 0 200 100">
+              <defs><clipPath id="cb"><rect x="0" y="0" width="200" height="100"/></clipPath></defs>
+              <rect x="0" y="0" width="200" height="100" fill="rgba(132,204,22,0.05)" stroke="#84cc16" stroke-width="0.5" stroke-opacity="0.8"/>
+              <g stroke="#84cc16" stroke-opacity="0.3" stroke-width="0.4"><line x1="33" y1="0" x2="33" y2="100"/><line x1="67" y1="0" x2="67" y2="100"/><line x1="100" y1="0" x2="100" y2="100"/><line x1="133" y1="0" x2="133" y2="100"/><line x1="167" y1="0" x2="167" y2="100"/><line x1="0" y1="33" x2="200" y2="33"/><line x1="0" y1="67" x2="200" y2="67"/></g>
+              <rect x="0" y="-6" width="200" height="112" fill="#d946ef" fill-opacity="0.22" clip-path="url(#cb)"/>
+              <rect x="0" y="-6" width="200" height="112" fill="none" stroke="#d946ef" stroke-width="0.7" stroke-dasharray="3 2"/>
+              <rect x="0" y="0" width="190" height="95" fill="none" stroke="#fbbf24" stroke-width="0.6" stroke-dasharray="3 2"/>
+            </svg>
+          </div>
+        </div>
+      </article>
+
+      <!-- ============ PROPOSAL C · Phosphor & Pink ============ -->
+      <article class="proposal" style="--c-wall:#84cc16; --c-fit:#fde047; --c-fill:#ec4899; --c-req:#f97316;">
+        <div class="proposal-head">
+          <span class="p-num">C</span>
+          <span class="p-name">Phosphor & Pink</span>
+          <p class="p-desc">
+            Split-complement: lime (verde) + giallo fosforo + magenta-rosa (complementare). Mood <b>laboratorio/regia stage</b>,
+            tipo monitor wave/oscilloscopio. Fit (giallo) e Fill (rosa) sono entrambi calorosi ma <b>diversi sull'asse cromatico</b>.
+          </p>
+        </div>
+        <div class="proposal-grid">
+          <div class="legend">
+            <div class="swatch-row"><div class="swatch" style="background:#84cc16"></div><div class="meta"><div class="lbl">LED wall · cabinet</div><div class="hex">#84cc16 · lime</div></div></div>
+            <div class="swatch-row"><div class="swatch" style="background:#fde047"></div><div class="meta"><div class="lbl">Fit</div><div class="hex">#fde047 · volt yellow</div></div></div>
+            <div class="swatch-row"><div class="swatch" style="background:#ec4899"></div><div class="meta"><div class="lbl">Fill</div><div class="hex">#ec4899 · hot pink</div></div></div>
+            <div class="swatch-row"><div class="swatch" style="background:#f97316"></div><div class="meta"><div class="lbl">Muro richiesto · overflow</div><div class="hex">#f97316 · acid orange</div></div></div>
+          </div>
+          <div class="preview-block">
+            <div class="pl">Fit · letterbox</div>
+            <svg viewBox="0 0 200 100">
+              <rect x="0" y="0" width="200" height="100" fill="rgba(132,204,22,0.05)" stroke="#84cc16" stroke-width="0.5" stroke-opacity="0.8"/>
+              <g stroke="#84cc16" stroke-opacity="0.3" stroke-width="0.4"><line x1="33" y1="0" x2="33" y2="100"/><line x1="67" y1="0" x2="67" y2="100"/><line x1="100" y1="0" x2="100" y2="100"/><line x1="133" y1="0" x2="133" y2="100"/><line x1="167" y1="0" x2="167" y2="100"/><line x1="0" y1="33" x2="200" y2="33"/><line x1="0" y1="67" x2="200" y2="67"/></g>
+              <rect x="11" y="6" width="178" height="88" fill="#fde047" fill-opacity="0.22" stroke="#fde047" stroke-width="0.7"/>
+              <rect x="0" y="0" width="190" height="95" fill="none" stroke="#f97316" stroke-width="0.6" stroke-dasharray="3 2"/>
+            </svg>
+          </div>
+          <div class="preview-block">
+            <div class="pl">Fill · crop</div>
+            <svg viewBox="0 0 200 100">
+              <defs><clipPath id="cc"><rect x="0" y="0" width="200" height="100"/></clipPath></defs>
+              <rect x="0" y="0" width="200" height="100" fill="rgba(132,204,22,0.05)" stroke="#84cc16" stroke-width="0.5" stroke-opacity="0.8"/>
+              <g stroke="#84cc16" stroke-opacity="0.3" stroke-width="0.4"><line x1="33" y1="0" x2="33" y2="100"/><line x1="67" y1="0" x2="67" y2="100"/><line x1="100" y1="0" x2="100" y2="100"/><line x1="133" y1="0" x2="133" y2="100"/><line x1="167" y1="0" x2="167" y2="100"/><line x1="0" y1="33" x2="200" y2="33"/><line x1="0" y1="67" x2="200" y2="67"/></g>
+              <rect x="0" y="-6" width="200" height="112" fill="#ec4899" fill-opacity="0.22" clip-path="url(#cc)"/>
+              <rect x="0" y="-6" width="200" height="112" fill="none" stroke="#ec4899" stroke-width="0.7" stroke-dasharray="3 2"/>
+              <rect x="0" y="0" width="190" height="95" fill="none" stroke="#f97316" stroke-width="0.6" stroke-dasharray="3 2"/>
+            </svg>
+          </div>
+        </div>
+      </article>
+
+      <!-- ============ PROPOSAL D · Cool Acid ============ -->
+      <article class="proposal" style="--c-wall:#84cc16; --c-fit:#22d3ee; --c-fill:#c084fc; --c-req:#fbbf24;">
+        <div class="proposal-head">
+          <span class="p-num">D</span>
+          <span class="p-name">Cool Acid</span>
+          <p class="p-desc">
+            Variante "fredda" della Triad: ciano + viola elettrico. <b>Più sobria di B</b>, meno saturazione totale,
+            scorre meglio nella console UI senza affaticare l'occhio in lavori lunghi. Buona per uso in studio.
+          </p>
+        </div>
+        <div class="proposal-grid">
+          <div class="legend">
+            <div class="swatch-row"><div class="swatch" style="background:#84cc16"></div><div class="meta"><div class="lbl">LED wall · cabinet</div><div class="hex">#84cc16 · lime</div></div></div>
+            <div class="swatch-row"><div class="swatch" style="background:#22d3ee"></div><div class="meta"><div class="lbl">Fit</div><div class="hex">#22d3ee · electric cyan</div></div></div>
+            <div class="swatch-row"><div class="swatch" style="background:#c084fc"></div><div class="meta"><div class="lbl">Fill</div><div class="hex">#c084fc · electric purple</div></div></div>
+            <div class="swatch-row"><div class="swatch" style="background:#fbbf24"></div><div class="meta"><div class="lbl">Muro richiesto · overflow</div><div class="hex">#fbbf24 · amber</div></div></div>
+          </div>
+          <div class="preview-block">
+            <div class="pl">Fit · letterbox</div>
+            <svg viewBox="0 0 200 100">
+              <rect x="0" y="0" width="200" height="100" fill="rgba(132,204,22,0.05)" stroke="#84cc16" stroke-width="0.5" stroke-opacity="0.8"/>
+              <g stroke="#84cc16" stroke-opacity="0.3" stroke-width="0.4"><line x1="33" y1="0" x2="33" y2="100"/><line x1="67" y1="0" x2="67" y2="100"/><line x1="100" y1="0" x2="100" y2="100"/><line x1="133" y1="0" x2="133" y2="100"/><line x1="167" y1="0" x2="167" y2="100"/><line x1="0" y1="33" x2="200" y2="33"/><line x1="0" y1="67" x2="200" y2="67"/></g>
+              <rect x="11" y="6" width="178" height="88" fill="#22d3ee" fill-opacity="0.22" stroke="#22d3ee" stroke-width="0.7"/>
+              <rect x="0" y="0" width="190" height="95" fill="none" stroke="#fbbf24" stroke-width="0.6" stroke-dasharray="3 2"/>
+            </svg>
+          </div>
+          <div class="preview-block">
+            <div class="pl">Fill · crop</div>
+            <svg viewBox="0 0 200 100">
+              <defs><clipPath id="cd"><rect x="0" y="0" width="200" height="100"/></clipPath></defs>
+              <rect x="0" y="0" width="200" height="100" fill="rgba(132,204,22,0.05)" stroke="#84cc16" stroke-width="0.5" stroke-opacity="0.8"/>
+              <g stroke="#84cc16" stroke-opacity="0.3" stroke-width="0.4"><line x1="33" y1="0" x2="33" y2="100"/><line x1="67" y1="0" x2="67" y2="100"/><line x1="100" y1="0" x2="100" y2="100"/><line x1="133" y1="0" x2="133" y2="100"/><line x1="167" y1="0" x2="167" y2="100"/><line x1="0" y1="33" x2="200" y2="33"/><line x1="0" y1="67" x2="200" y2="67"/></g>
+              <rect x="0" y="-6" width="200" height="112" fill="#c084fc" fill-opacity="0.22" clip-path="url(#cd)"/>
+              <rect x="0" y="-6" width="200" height="112" fill="none" stroke="#c084fc" stroke-width="0.7" stroke-dasharray="3 2"/>
+              <rect x="0" y="0" width="190" height="95" fill="none" stroke="#fbbf24" stroke-width="0.6" stroke-dasharray="3 2"/>
+            </svg>
+          </div>
+        </div>
+      </article>
+
+      <!-- ============ PROPOSAL E · Bauhaus Acid ============ -->
+      <article class="proposal" style="--c-wall:#84cc16; --c-fit:#fde047; --c-fill:#22d3ee; --c-req:#ec4899;">
+        <div class="proposal-head">
+          <span class="p-num">E</span>
+          <span class="p-name">Bauhaus Acid</span>
+          <p class="p-desc">
+            I 3 primari "elettrici": lime + giallo + ciano + rosa. Stile <b>poster Bauhaus rifatto al neon</b>.
+            Ogni elemento è chiaramente distinto, ma la palette è più "loud" — adatta se l'app deve avere personalità forte.
+          </p>
+        </div>
+        <div class="proposal-grid">
+          <div class="legend">
+            <div class="swatch-row"><div class="swatch" style="background:#84cc16"></div><div class="meta"><div class="lbl">LED wall · cabinet</div><div class="hex">#84cc16 · lime</div></div></div>
+            <div class="swatch-row"><div class="swatch" style="background:#fde047"></div><div class="meta"><div class="lbl">Fit</div><div class="hex">#fde047 · volt yellow</div></div></div>
+            <div class="swatch-row"><div class="swatch" style="background:#22d3ee"></div><div class="meta"><div class="lbl">Fill</div><div class="hex">#22d3ee · electric cyan</div></div></div>
+            <div class="swatch-row"><div class="swatch" style="background:#ec4899"></div><div class="meta"><div class="lbl">Muro richiesto · overflow</div><div class="hex">#ec4899 · hot pink</div></div></div>
+          </div>
+          <div class="preview-block">
+            <div class="pl">Fit · letterbox</div>
+            <svg viewBox="0 0 200 100">
+              <rect x="0" y="0" width="200" height="100" fill="rgba(132,204,22,0.05)" stroke="#84cc16" stroke-width="0.5" stroke-opacity="0.8"/>
+              <g stroke="#84cc16" stroke-opacity="0.3" stroke-width="0.4"><line x1="33" y1="0" x2="33" y2="100"/><line x1="67" y1="0" x2="67" y2="100"/><line x1="100" y1="0" x2="100" y2="100"/><line x1="133" y1="0" x2="133" y2="100"/><line x1="167" y1="0" x2="167" y2="100"/><line x1="0" y1="33" x2="200" y2="33"/><line x1="0" y1="67" x2="200" y2="67"/></g>
+              <rect x="11" y="6" width="178" height="88" fill="#fde047" fill-opacity="0.22" stroke="#fde047" stroke-width="0.7"/>
+              <rect x="0" y="0" width="190" height="95" fill="none" stroke="#ec4899" stroke-width="0.6" stroke-dasharray="3 2"/>
+            </svg>
+          </div>
+          <div class="preview-block">
+            <div class="pl">Fill · crop</div>
+            <svg viewBox="0 0 200 100">
+              <defs><clipPath id="ce"><rect x="0" y="0" width="200" height="100"/></clipPath></defs>
+              <rect x="0" y="0" width="200" height="100" fill="rgba(132,204,22,0.05)" stroke="#84cc16" stroke-width="0.5" stroke-opacity="0.8"/>
+              <g stroke="#84cc16" stroke-opacity="0.3" stroke-width="0.4"><line x1="33" y1="0" x2="33" y2="100"/><line x1="67" y1="0" x2="67" y2="100"/><line x1="100" y1="0" x2="100" y2="100"/><line x1="133" y1="0" x2="133" y2="100"/><line x1="167" y1="0" x2="167" y2="100"/><line x1="0" y1="33" x2="200" y2="33"/><line x1="0" y1="67" x2="200" y2="67"/></g>
+              <rect x="0" y="-6" width="200" height="112" fill="#22d3ee" fill-opacity="0.22" clip-path="url(#ce)"/>
+              <rect x="0" y="-6" width="200" height="112" fill="none" stroke="#22d3ee" stroke-width="0.7" stroke-dasharray="3 2"/>
+              <rect x="0" y="0" width="190" height="95" fill="none" stroke="#ec4899" stroke-width="0.6" stroke-dasharray="3 2"/>
+            </svg>
+          </div>
+        </div>
+      </article>
+
+      <footer style="margin-top:32px;color:#64748b;font-size:12px;text-align:center;">
+        Dimmi quale ti convince (o se vuoi una variante con un swap specifico) e applico nell'app.
+      </footer>
+    </div>
+  </body>
+</html>
