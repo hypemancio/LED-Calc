@@ -7,6 +7,8 @@ dev-dist
 .vercel
 .DS_Store
 *.log
+*.tsbuildinfo
 .env
 .env.local
 .env.*.local
+PROMPT_CLAUDE_CODE.md
