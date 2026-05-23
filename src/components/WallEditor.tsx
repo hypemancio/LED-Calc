@@ -333,14 +333,14 @@ export function WallEditor({ wall, onChange }: Props) {
             <NumberField
               label="Larghezza"
               suffix="cab"
-              step={0.5}
+              step={1}
               value={cabsW}
               onChange={(v) => onChange({ wallWidthMm: v * wall.cabinetWidthMm })}
             />
             <NumberField
               label="Altezza"
               suffix="cab"
-              step={0.5}
+              step={1}
               value={cabsH}
               onChange={(v) => onChange({ wallHeightMm: v * wall.cabinetHeightMm })}
             />
