@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LED Calc — Icon sets comparison</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=JetBrains+Mono:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #161719;
+        --panel: #1c1d20;
+        --panel-2: #232427;
+        --border: #2a2c30;
+        --text: #f1f5f9;
+        --text-dim: #94a3b8;
+        --text-faint: #64748b;
+        --brand: #7ffed1;
+      }
+      * { box-sizing: border-box; margin: 0; }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Chakra Petch", sans-serif;
+        padding: 32px 24px 80px;
+      }
+      .page { max-width: 1200px; margin: 0 auto; }
+      header.top { margin-bottom: 28px; }
+      header.top h1 {
+        font-size: 26px; font-weight: 600;
+        text-transform: uppercase; letter-spacing: 0.04em;
+      }
+      header.top p {
+        margin-top: 10px; color: var(--text-dim);
+        font-size: 14px; max-width: 800px; line-height: 1.55;
+      }
+      .legend {
+        margin-top: 16px; display: flex; gap: 18px; flex-wrap: wrap;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+      }
+      .legend span {
+        padding: 6px 12px; border-radius: 999px;
+        background: var(--panel-2);
+        border: 1px solid var(--border);
+        color: var(--text-dim);
+      }
+      .legend b { color: var(--brand); font-weight: 600; }
+
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+      }
+      thead th {
+        background: var(--panel-2);
+        font-family: "Chakra Petch", sans-serif;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 700;
+        padding: 14px 16px;
+        text-align: center;
+        border-bottom: 1px solid var(--border);
+      }
+      thead th:first-child {
+        text-align: left;
+        color: var(--brand);
+      }
+      tbody td {
+        padding: 18px 16px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+      }
+      tbody tr:last-child td { border-bottom: 0; }
+      tbody tr:hover { background: rgba(127, 254, 209, 0.03); }
+      td.label {
+        font-family: "Chakra Petch", sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text);
+      }
+      td.label .where {
+        display: block;
+        margin-top: 3px;
+        font-size: 10px;
+        font-weight: 400;
+        text-transform: none;
+        letter-spacing: 0;
+        color: var(--text-faint);
+        font-family: "JetBrains Mono", monospace;
+      }
+      td.icon-cell {
+        text-align: center;
+      }
+      .icon {
+        display: inline-block;
+        width: 36px;
+        height: 36px;
+        background-color: var(--brand);
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+      }
+      .icon-name {
+        display: block;
+        margin-top: 6px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        color: var(--text-faint);
+      }
+      footer {
+        margin-top: 28px;
+        text-align: center;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        color: var(--text-faint);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="top">
+        <h1>Icon sets — confronto Lucide · Phosphor · Tabler</h1>
+        <p>
+          Le stesse 15 icone disegnate dai 3 set principali, renderizzate in
+          mint Resolume sulla palette LED Calc. Tutte stroke-based o regular weight,
+          dimensione 36px. Usa CSS <code style="font-family: 'JetBrains Mono', monospace; color: var(--brand);">mask-image</code>
+          per colorare le SVG fornite via CDN.
+        </p>
+        <div class="legend">
+          <span><b>Lucide</b> · stroke 2px · 1500+ icone</span>
+          <span><b>Phosphor</b> · regular weight · 7000+ icone</span>
+          <span><b>Tabler</b> · stroke 2px · 4500+ icone</span>
+        </div>
+      </header>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Caso d'uso</th>
+            <th>Lucide</th>
+            <th>Phosphor (regular)</th>
+            <th>Tabler</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="label">Salva<span class="where">Btn "Salva", icona toast</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/save.svg');mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/save.svg');"></span><span class="icon-name">save</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/floppy-disk.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/floppy-disk.svg');"></span><span class="icon-name">floppy-disk</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/device-floppy.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/device-floppy.svg');"></span><span class="icon-name">device-floppy</span></td>
+          </tr>
+          <tr>
+            <td class="label">Storico<span class="where">Btn "Storico"</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/history.svg');mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/history.svg');"></span><span class="icon-name">history</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/clock-counter-clockwise.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/clock-counter-clockwise.svg');"></span><span class="icon-name">clock-counter-clockwise</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/history.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/history.svg');"></span><span class="icon-name">history</span></td>
+          </tr>
+          <tr>
+            <td class="label">Modifica<span class="where">Rinomina wall (sidebar)</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/pencil.svg');mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/pencil.svg');"></span><span class="icon-name">pencil</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/pencil-simple.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/pencil-simple.svg');"></span><span class="icon-name">pencil-simple</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/pencil.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/pencil.svg');"></span><span class="icon-name">pencil</span></td>
+          </tr>
+          <tr>
+            <td class="label">Duplica<span class="where">Duplica wall</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/copy.svg');mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/copy.svg');"></span><span class="icon-name">copy</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/copy.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/copy.svg');"></span><span class="icon-name">copy</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/copy.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/copy.svg');"></span><span class="icon-name">copy</span></td>
+          </tr>
+          <tr>
+            <td class="label">Elimina<span class="where">Rimuovi wall / snapshot</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/trash-2.svg');mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/trash-2.svg');"></span><span class="icon-name">trash-2</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/trash.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/trash.svg');"></span><span class="icon-name">trash</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/trash.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/trash.svg');"></span><span class="icon-name">trash</span></td>
+          </tr>
+          <tr>
+            <td class="label">Aggiungi<span class="where">+ wall / scenario</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/plus.svg');mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/plus.svg');"></span><span class="icon-name">plus</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/plus.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/plus.svg');"></span><span class="icon-name">plus</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/plus.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/plus.svg');"></span><span class="icon-name">plus</span></td>
+          </tr>
+          <tr>
+            <td class="label">Download<span class="where">Export PNG / PDF / JSON</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/download.svg');mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/download.svg');"></span><span class="icon-name">download</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/download-simple.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/download-simple.svg');"></span><span class="icon-name">download-simple</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/download.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/download.svg');"></span><span class="icon-name">download</span></td>
+          </tr>
+          <tr>
+            <td class="label">Upload<span class="where">Import JSON / Carica logo</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/upload.svg');mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/upload.svg');"></span><span class="icon-name">upload</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/upload-simple.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/upload-simple.svg');"></span><span class="icon-name">upload-simple</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/upload.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/upload.svg');"></span><span class="icon-name">upload</span></td>
+          </tr>
+          <tr>
+            <td class="label">Settings / Tools<span class="where">Stime, parametri</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/settings-2.svg');mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/settings-2.svg');"></span><span class="icon-name">settings-2</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/gear-six.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/gear-six.svg');"></span><span class="icon-name">gear-six</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/adjustments.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/adjustments.svg');"></span><span class="icon-name">adjustments</span></td>
+          </tr>
+          <tr>
+            <td class="label">Grid / Cabinet<span class="where">Pattern preset cabinet</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/grid-3x3.svg');mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/grid-3x3.svg');"></span><span class="icon-name">grid-3x3</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/grid-four.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/grid-four.svg');"></span><span class="icon-name">grid-four</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/grid-3x3.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/grid-3x3.svg');"></span><span class="icon-name">grid-3x3</span></td>
+          </tr>
+          <tr>
+            <td class="label">Cable / Connection<span class="where">Sezione Cablaggio</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/cable.svg');mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/cable.svg');"></span><span class="icon-name">cable</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/plugs-connected.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/plugs-connected.svg');"></span><span class="icon-name">plugs-connected</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/plug-connected.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/plug-connected.svg');"></span><span class="icon-name">plug-connected</span></td>
+          </tr>
+          <tr>
+            <td class="label">Monitor / Screen<span class="where">Ledwall / preview</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/monitor.svg');mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/monitor.svg');"></span><span class="icon-name">monitor</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/monitor.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/monitor.svg');"></span><span class="icon-name">monitor</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/device-desktop.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/device-desktop.svg');"></span><span class="icon-name">device-desktop</span></td>
+          </tr>
+          <tr>
+            <td class="label">Layers / Stack<span class="where">Multi-Ledwall / sidebar</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/layers.svg');mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/layers.svg');"></span><span class="icon-name">layers</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/stack.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/stack.svg');"></span><span class="icon-name">stack</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/stack-2.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/stack-2.svg');"></span><span class="icon-name">stack-2</span></td>
+          </tr>
+          <tr>
+            <td class="label">Image<span class="where">Logo upload / test card</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/image.svg');mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/image.svg');"></span><span class="icon-name">image</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/image.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/image.svg');"></span><span class="icon-name">image</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/photo.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/photo.svg');"></span><span class="icon-name">photo</span></td>
+          </tr>
+          <tr>
+            <td class="label">Heart<span class="where">Footer "Made with ♥"</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/heart.svg');mask-image:url('https://cdn.jsdelivr.net/npm/lucide-static@0.451.0/icons/heart.svg');"></span><span class="icon-name">heart</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/heart.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@phosphor-icons/core@2.1.1/assets/regular/heart.svg');"></span><span class="icon-name">heart</span></td>
+            <td class="icon-cell"><span class="icon" style="-webkit-mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/heart.svg');mask-image:url('https://cdn.jsdelivr.net/npm/@tabler/icons@3.19.0/icons/outline/heart.svg');"></span><span class="icon-name">heart</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <footer>
+        Le 3 famiglie sono renderizzate alla stessa dimensione (36px) e colore (mint #7ffed1) per confronto neutro.
+        Le icone arrivano dai CDN ufficiali — la prima visita potrebbe avere caricamento leggermente lento.
+      </footer>
+    </div>
+  </body>
+</html>

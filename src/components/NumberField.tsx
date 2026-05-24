@@ -1,3 +1,5 @@
+import { ChevronDown, ChevronUp } from "lucide-react";
+
 interface Props {
   label: string;
   value: number;
@@ -79,9 +81,7 @@ export function NumberField({
               aria-label={`Aumenta ${label}`}
               className="grid h-5 w-6 place-items-center rounded-md border border-border bg-panel text-slate-500 transition hover:border-brand hover:text-brand"
             >
-              <svg width="8" height="5" viewBox="0 0 8 5" aria-hidden>
-                <polygon points="4,0 8,5 0,5" fill="currentColor" />
-              </svg>
+              <ChevronUp size={12} aria-hidden />
             </button>
             <button
               type="button"
@@ -90,9 +90,7 @@ export function NumberField({
               aria-label={`Diminuisci ${label}`}
               className="grid h-5 w-6 place-items-center rounded-md border border-border bg-panel text-slate-500 transition hover:border-brand hover:text-brand"
             >
-              <svg width="8" height="5" viewBox="0 0 8 5" aria-hidden>
-                <polygon points="0,0 8,0 4,5" fill="currentColor" />
-              </svg>
+              <ChevronDown size={12} aria-hidden />
             </button>
           </div>
         ) : null}

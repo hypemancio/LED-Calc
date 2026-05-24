@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
+import { Download, FolderOpen, Trash2, Upload, X } from "lucide-react";
 import {
   deleteFromHistory,
   exportHistoryBackup,
@@ -121,18 +122,18 @@ export function HistoryDialog({ open, onClose, onLoad, refreshKey = 0 }: Props) 
             <button
               type="button"
               onClick={handleExportBackup}
-              className="rounded-md border border-fit/40 bg-fit/10 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-fit-bright transition hover:border-fit hover:bg-fit/20"
+              className="inline-flex items-center gap-1 rounded-md border border-fit/40 bg-fit/10 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-fit-bright transition hover:border-fit hover:bg-fit/20"
               title="Esporta tutto lo storico come file JSON"
             >
-              Export backup
+              <Download size={12} aria-hidden /> Export backup
             </button>
             <button
               type="button"
               onClick={handleImportClick}
-              className="rounded-md border border-fill/40 bg-fill/10 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-fill-bright transition hover:border-fill hover:bg-fill/20"
+              className="inline-flex items-center gap-1 rounded-md border border-fill/40 bg-fill/10 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-fill-bright transition hover:border-fill hover:bg-fill/20"
               title="Importa un backup completo dello storico"
             >
-              Import backup
+              <Upload size={12} aria-hidden /> Import backup
             </button>
             <input
               ref={fileInputRef}
@@ -148,7 +149,7 @@ export function HistoryDialog({ open, onClose, onLoad, refreshKey = 0 }: Props) 
               aria-label="Chiudi"
               className="grid h-8 w-8 place-items-center rounded-lg border border-border bg-panel text-slate-400 transition hover:border-brand hover:text-brand"
             >
-              ×
+              <X size={16} aria-hidden />
             </button>
           </div>
         </header>
@@ -232,9 +233,9 @@ function HistoryRow({ saved, onLoad, onDelete }: RowProps) {
         <button
           type="button"
           onClick={onLoad}
-          className="rounded-md border border-brand/40 bg-brand/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-brand-bright transition hover:border-brand hover:bg-brand/20"
+          className="inline-flex items-center gap-1 rounded-md border border-brand/40 bg-brand/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-brand-bright transition hover:border-brand hover:bg-brand/20"
         >
-          Carica
+          <FolderOpen size={12} aria-hidden /> Carica
         </button>
         <button
           type="button"
@@ -242,7 +243,7 @@ function HistoryRow({ saved, onLoad, onDelete }: RowProps) {
           aria-label="Elimina"
           className="grid h-7 w-7 place-items-center rounded-md border border-border bg-panel text-slate-400 transition hover:border-red-500/50 hover:text-red-400"
         >
-          ×
+          <Trash2 size={14} aria-hidden />
         </button>
       </div>
     </li>

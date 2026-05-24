@@ -1,4 +1,13 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
+import {
+  ArrowDownLeft,
+  ArrowDownRight,
+  ArrowUpLeft,
+  ArrowUpRight,
+  Crosshair,
+  ImagePlus,
+  Trash2,
+} from "lucide-react";
 import { Section } from "./Section";
 import {
   DEFAULT_TEST_CARD_PARAMS,
@@ -116,6 +125,8 @@ export function TestCardSection({ wall, projectName }: Props) {
   return (
     <Section
       title="Test card"
+      collapsible
+      defaultOpen={false}
       description={
         selectedDef
           ? `${selectedDef.label} — ${selectedDef.description}`
@@ -346,12 +357,16 @@ interface LogoControlProps {
   setParams: React.Dispatch<React.SetStateAction<TestCardParams>>;
 }
 
-const LOGO_POSITIONS: Array<{ key: LogoPosition; label: string }> = [
-  { key: "TL", label: "↖" },
-  { key: "TR", label: "↗" },
-  { key: "CENTER", label: "✛" },
-  { key: "BL", label: "↙" },
-  { key: "BR", label: "↘" },
+const LOGO_POSITIONS: Array<{
+  key: LogoPosition;
+  label: string;
+  Icon: typeof ArrowUpLeft;
+}> = [
+  { key: "TL", label: "TL", Icon: ArrowUpLeft },
+  { key: "TR", label: "TR", Icon: ArrowUpRight },
+  { key: "CENTER", label: "C", Icon: Crosshair },
+  { key: "BL", label: "BL", Icon: ArrowDownLeft },
+  { key: "BR", label: "BR", Icon: ArrowDownRight },
 ];
 
 const MAX_LOGO_FILE_BYTES = 2_500_000; // 2.5 MB
@@ -408,9 +423,9 @@ function LogoControl({ params, setParams }: LogoControlProps) {
             <button
               type="button"
               onClick={removeLogo}
-              className="rounded-md border border-border bg-panel px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 transition hover:border-red-500/50 hover:text-red-400"
+              className="inline-flex items-center gap-1 rounded-md border border-border bg-panel px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 transition hover:border-red-500/50 hover:text-red-400"
             >
-              Rimuovi
+              <Trash2 size={11} aria-hidden /> Rimuovi
             </button>
           </div>
 
@@ -422,6 +437,7 @@ function LogoControl({ params, setParams }: LogoControlProps) {
             <div className="flex gap-1">
               {LOGO_POSITIONS.map((pos) => {
                 const active = params.logoPosition === pos.key;
+                const Icon = pos.Icon;
                 return (
                   <button
                     key={pos.key}
@@ -432,13 +448,13 @@ function LogoControl({ params, setParams }: LogoControlProps) {
                     aria-label={pos.key}
                     title={pos.key}
                     className={[
-                      "grid h-7 w-7 place-items-center rounded-md border text-sm transition",
+                      "grid h-7 w-7 place-items-center rounded-md border transition",
                       active
                         ? "border-brand bg-brand/15 text-brand"
                         : "border-border bg-panel text-slate-400 hover:border-slate-500 hover:text-slate-200",
                     ].join(" ")}
                   >
-                    {pos.label}
+                    <Icon size={14} aria-hidden />
                   </button>
                 );
               })}
@@ -500,7 +516,7 @@ function LogoControl({ params, setParams }: LogoControlProps) {
           onClick={onPick}
           className="flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-border bg-panel/50 px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400 transition hover:border-brand hover:text-brand"
         >
-          <span aria-hidden>📁</span> Carica logo
+          <ImagePlus size={14} aria-hidden /> Carica logo
         </button>
       )}
       <input

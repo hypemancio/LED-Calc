@@ -1,4 +1,14 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
+import {
+  CheckCircle2,
+  Download,
+  FileDown,
+  FilePlus2,
+  History,
+  ImageDown,
+  Save,
+  Upload,
+} from "lucide-react";
 import { SiteHeader } from "./components/SiteHeader";
 import { SiteFooter } from "./components/SiteFooter";
 import { StatusLed } from "./components/StatusLed";
@@ -81,6 +91,20 @@ export default function App() {
     window.addEventListener("ledcalc-history-changed", handler);
     return () => window.removeEventListener("ledcalc-history-changed", handler);
   }, []);
+
+  // Tick per aggiornare il "salvato N min fa" senza intervento utente
+  const [, setMinuteTick] = useState(0);
+  useEffect(() => {
+    const id = window.setInterval(() => setMinuteTick((t) => t + 1), 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  // Ultimo savedAt dello snapshot di questo progetto (null se mai salvato)
+  const lastSavedAt = useMemo<number | null>(() => {
+    const found = findSavedByProjectId(project.id);
+    return found?.savedAt ?? null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project.id, historyRefreshKey, historyCount]);
 
   // ---------- Mutazioni progetto ----------
 
@@ -254,23 +278,24 @@ export default function App() {
     activeResult.warnings.wallNotMultipleOfCabinetHeight;
 
   return (
-    <div className="min-h-dvh w-full px-4 pb-0 lg:px-10">
+    <div className="min-h-dvh w-full px-4 pb-20 lg:px-10 lg:pb-16">
       <SiteHeader />
 
       <main className="pb-6">
         {/* PROJECT BAR */}
         <div className="mb-6 flex flex-col gap-4 lg:mb-8 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0 flex-1">
-            <label className="block">
-              <span className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+            <div className="flex items-baseline gap-3">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                 Progetto
               </span>
-              <input
-                value={project.name}
-                onChange={(e) => renameProject(e.target.value)}
-                className="mt-0.5 w-full max-w-md rounded-md border border-transparent bg-transparent px-1 py-0.5 text-lg font-semibold text-slate-100 outline-none transition hover:border-border focus:border-brand focus:bg-panel-2/40 lg:text-xl"
-              />
-            </label>
+              <SavedAtBadge ts={lastSavedAt} />
+            </div>
+            <input
+              value={project.name}
+              onChange={(e) => renameProject(e.target.value)}
+              className="mt-0.5 w-full max-w-md rounded-md border border-transparent bg-transparent px-1 py-0.5 text-lg font-semibold text-slate-100 outline-none transition hover:border-border focus:border-brand focus:bg-panel-2/40 lg:text-xl"
+            />
             <p className="mt-1 text-sm text-slate-400">
               {project.walls.length} Ledwall · risoluzione, sorgente, peso, consumo.
             </p>
@@ -293,18 +318,20 @@ export default function App() {
               <button
                 type="button"
                 onClick={saveProjectSnapshot}
-                className="rounded-lg border border-brand/40 bg-brand/10 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-brand-bright transition hover:border-brand hover:bg-brand/20"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-brand/40 bg-brand/10 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-brand-bright transition hover:border-brand hover:bg-brand/20"
               >
+                <Save size={14} aria-hidden />
                 Salva
               </button>
               <button
                 type="button"
                 onClick={() => setHistoryOpen(true)}
-                className="rounded-lg border border-border bg-panel-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-slate-300 transition hover:border-brand hover:text-brand"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-panel-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-slate-300 transition hover:border-brand hover:text-brand"
               >
+                <History size={14} aria-hidden />
                 Storico
                 {historyCount > 0 ? (
-                  <span className="ml-2 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-brand/20 px-1 font-mono text-[10px] text-brand-bright">
+                  <span className="ml-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-brand/20 px-1 font-mono text-[10px] text-brand-bright">
                     {historyCount}
                   </span>
                 ) : null}
@@ -312,42 +339,51 @@ export default function App() {
               <button
                 type="button"
                 onClick={newProject}
-                className="rounded-lg border border-border bg-panel-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-slate-300 transition hover:border-slate-500 hover:text-slate-100"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-panel-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-slate-300 transition hover:border-slate-500 hover:text-slate-100"
               >
+                <FilePlus2 size={14} aria-hidden />
                 Nuovo
               </button>
+              <span
+                aria-hidden
+                className="mx-1 hidden h-6 w-px self-center bg-border lg:inline-block"
+              />
               <button
                 type="button"
                 onClick={exportPng}
                 disabled={exporting !== null}
-                className="rounded-lg border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-amber-200 transition hover:border-amber-400 hover:bg-amber-400/20 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-amber-200 transition hover:border-amber-400 hover:bg-amber-400/20 disabled:cursor-not-allowed disabled:opacity-50"
                 title="Esporta scheda progetto come immagine PNG"
               >
+                <ImageDown size={14} aria-hidden />
                 {exporting === "png" ? "Export…" : "Export PNG"}
               </button>
               <button
                 type="button"
                 onClick={exportPdf}
                 disabled={exporting !== null}
-                className="rounded-lg border border-sky-400/40 bg-sky-400/10 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-sky-200 transition hover:border-sky-400 hover:bg-sky-400/20 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-sky-400/40 bg-sky-400/10 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-sky-200 transition hover:border-sky-400 hover:bg-sky-400/20 disabled:cursor-not-allowed disabled:opacity-50"
                 title="Esporta scheda progetto come PDF"
               >
+                <FileDown size={14} aria-hidden />
                 {exporting === "pdf" ? "Export…" : "Export PDF"}
               </button>
               <button
                 type="button"
                 onClick={exportJson}
-                className="rounded-lg border border-fit/40 bg-fit/10 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-fit-bright transition hover:border-fit hover:bg-fit/20"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-fit/40 bg-fit/10 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-fit-bright transition hover:border-fit hover:bg-fit/20"
                 title="Esporta progetto come file JSON (backup/condivisione)"
               >
+                <Download size={14} aria-hidden />
                 Export JSON
               </button>
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="rounded-lg border border-fill/40 bg-fill/10 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-fill-bright transition hover:border-fill hover:bg-fill/20"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-fill/40 bg-fill/10 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-fill-bright transition hover:border-fill hover:bg-fill/20"
                 title="Importa progetto da file JSON"
               >
+                <Upload size={14} aria-hidden />
                 Import JSON
               </button>
               <input
@@ -451,11 +487,55 @@ export default function App() {
       {savedToast ? (
         <div
           role="status"
-          className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full border border-brand/40 bg-brand/15 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-brand-bright backdrop-blur"
+          className="fixed bottom-16 left-1/2 z-50 inline-flex -translate-x-1/2 items-center gap-2 rounded-full border border-brand/40 bg-brand/15 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-brand-bright backdrop-blur"
         >
-          ✓ {savedToast}
+          <CheckCircle2 size={14} aria-hidden />
+          {savedToast}
         </div>
       ) : null}
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// SavedAtBadge — testo relativo di "ultimo salvataggio" accanto al nome
+// ---------------------------------------------------------------------------
+
+const absoluteDateFormat = new Intl.DateTimeFormat("it-IT", {
+  dateStyle: "medium",
+  timeStyle: "short",
+});
+
+function formatRelativeSave(ts: number): string {
+  const diff = Date.now() - ts;
+  if (diff < 0) return "ora";
+  const minutes = Math.floor(diff / 60_000);
+  if (minutes < 1) return "ora";
+  if (minutes < 60) return `${minutes} min fa`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} h fa`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} g fa`;
+  return new Intl.DateTimeFormat("it-IT", {
+    day: "2-digit",
+    month: "short",
+  }).format(ts);
+}
+
+function SavedAtBadge({ ts }: { ts: number | null }) {
+  if (ts === null) {
+    return (
+      <span className="font-mono text-[10px] italic text-slate-600">
+        · non ancora salvato
+      </span>
+    );
+  }
+  return (
+    <span
+      className="font-mono text-[10px] text-slate-500"
+      title={`Ultimo salvataggio: ${absoluteDateFormat.format(ts)}`}
+    >
+      · salvato {formatRelativeSave(ts)}
+    </span>
   );
 }

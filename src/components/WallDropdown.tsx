@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { Plus } from "lucide-react";
 import { computeWallResult, type WallConfig } from "../lib/wall";
 
 interface Props {
@@ -53,9 +54,9 @@ export function WallDropdown({
           type="button"
           onClick={onAdd}
           aria-label="Aggiungi Ledwall"
-          className="mt-4 grid h-12 w-12 flex-none place-items-center rounded-lg border border-dashed border-border bg-panel text-xl font-bold text-slate-400 transition hover:border-brand hover:text-brand"
+          className="mt-4 grid h-12 w-12 flex-none place-items-center rounded-lg border border-dashed border-border bg-panel text-slate-400 transition hover:border-brand hover:text-brand"
         >
-          +
+          <Plus size={20} aria-hidden />
         </button>
       </div>
       {summary ? (

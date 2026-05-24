@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Copy, Pencil, Plus, Trash2 } from "lucide-react";
 import {
   computeWallResult,
   type WallConfig,
@@ -64,7 +65,7 @@ export function WallSidebar({
         onClick={onAdd}
         className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-panel-2/40 px-3 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-400 transition hover:border-brand hover:text-brand"
       >
-        <span aria-hidden className="text-base leading-none">+</span>
+        <Plus size={14} aria-hidden />
         Aggiungi
       </button>
     </aside>
@@ -158,7 +159,7 @@ function WallSidebarItem({
             onStartRename();
           }}
         >
-          ✎
+          <Pencil size={12} aria-hidden />
         </IconBtn>
         <IconBtn
           label="Duplica"
@@ -167,7 +168,7 @@ function WallSidebarItem({
             onDuplicate();
           }}
         >
-          ⧉
+          <Copy size={12} aria-hidden />
         </IconBtn>
         {canDelete ? (
           <IconBtn
@@ -178,7 +179,7 @@ function WallSidebarItem({
               if (confirm(`Eliminare "${wall.name}"?`)) onDelete();
             }}
           >
-            ×
+            <Trash2 size={12} aria-hidden />
           </IconBtn>
         ) : null}
       </div>
